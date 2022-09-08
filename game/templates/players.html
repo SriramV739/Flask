@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    @import url("https://fonts.googleapis.com/css?family=Roboto");
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Roboto, arial, sans, sans-serif;
+    /* font-family: Quicksand, arial, sans, sans-serif; */
+    /* outline: 1px solid red; */
+}
+
+a {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
+
+body {
+    background-color: #384F9E;
+}
+
+nav {
+    background-color: #4f69c1;
+    width: 100%;
+    position: fixed;
+    z-index: 100;
+}
+
+.under-nav {
+    padding: 5px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.lwv-back {
+    height: 48px;
+    width: 48px;
+    border-radius: 50%;
+    background-color: #fff;
+    position: relative;
+    left: 10px;
+}
+
+.nav-h3-a {
+    color: #fff;
+}
+.nav-h3-a p {
+    font-size: 1.1rem;
+    padding: 0 .8rem 0 0;
+}
+
+.lwv-img {
+    width: 45px;
+    /* display: flex;
+    align-items: center;
+    justify-content: center; */
+    padding: 13px 0 0 7px;
+    cursor: pointer;
+}
+
+.nav-menu-blk {
+    padding: 20px 10px 0 0;
+}
+
+.nav-menu {
+    width: 35px;
+    /* float: right; */
+}
+
+.s2-img {
+    width: 80%;
+    border-radius: 10px;
+}
+
+
+.section-hd {
+    position: relative;
+    top: 5rem;
+    text-align: center;
+}
+
+.section-hd h1 {
+    color: #fff;
+    font-weight: bold;
+    font-size: 2.4rem;
+    padding: 0px 20px 20px 20px;
+}
+
+
+.verify-top {
+    padding: 1rem 0 2rem 0;
+}
+
+.verify {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Quicksand, arial, sans, sans-serif;
+}
+
+.verify-bt {
+    display: block;
+    padding: .5rem 0 0em 0;
+}
+
+.verify-bt h2 {
+    color: #fff;
+    padding: 0 0 .5rem 0;
+}
+/* .verify h2 {
+    font-size: 2rem;
+} */
+
+.hd-sub-text h1 {
+    padding: 1rem 0 0 0;
+}
+
+/* .bullets {
+    list-style-type: circle;
+    list-style-position: inside;
+} */
+
+.bul-pt::before {
+    content: "\2022";
+    position: relative;
+    right: .5rem;
+}
+
+.sub-ver-back {
+    /* background-color: #5977db; */
+    /* height: 3rem; */
+    /* width: 18rem; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: .3rem;
+}
+
+.ver-checkbox {
+    height: 2.2rem;
+    width: 3rem;
+    background-color: red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 7px 0 0;
+    border-radius: 5px;
+}
+
+.ver-check {
+    width: 37px;
+}
+
+.ver-p1, .ver-p2 {
+    font-family: Quicksand, arial, sans, sans-serif;
+    font-weight: bold;
+    font-size: 2rem;
+    letter-spacing: 1px;
+}
+
+.ver-p1 {
+    color: #fff;
+    margin: 0 7px 0 0;
+}
+.ver-p2 {
+    color: rgb(253, 54, 54);
+}
+.hex {
+    color: #fff;
+    font-family: Quicksand, arial, sans, sans-serif;
+}
+
+.sub-text-hd {
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 1rem 1rem 0 1rem;
+}
+.sub-text-hd-2 {
+    color: #fff;
+    font-size: 1.8rem;
+    padding: 1rem .5rem .2rem .5rem;
+}
+.sub-text-hd-3 {
+    color: #fff;
+    font-size: 1.8em;
+    padding: 0rem 0rem;
+}
+
+/* .section-hd-b h1 {
+    padding: 1rem 0 0 0;
+} */
+
+.icons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .3s;
+}
+
+.down-arrow-2 {
+    padding: .5rem 0 0 0;
+    width: 2rem;
+    /* display: none; */
+}
+
+.close {
+    width: 1.5rem;
+    padding: 1.5rem 0 .8rem 0;
+    cursor: pointer;
+    display: none;
+}
+
+.game-selections {
+    padding: 1rem 0 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+.game-selections a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.game-select {
+    padding: .5rem 0;
+    border: 3px solid yellow;
+    border-radius: 2rem;
+    /* width: 85%; */
+}
+
+.game-select h2 {
+    color: #fff;
+}
+
+.sub-game-selections {
+    padding: 0;
+    margin: -4.5rem 0 0 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: .3s;
+    transform: translateX(-100%);
+}
+
+.sub-gs1 {
+    padding: .5rem .8rem .5rem .8rem;
+    cursor: pointer;
+}
+.gs1 {
+    margin: 1.5rem 0 0 0;
+    padding: .5rem .8rem .5rem .8rem;
+}
+.gs2-a {
+    margin: 1rem 0 0 0;
+}
+.gs2 {
+    margin: .5rem 0 0 0;
+    padding: .5rem .8rem;
+}
+
+.gs3 {
+    margin: .5rem 0 0 0;
+    padding: .2rem 1rem;
+}
+.gs3-a {
+    padding: 1rem 0 0 0;
+}
+
+.gs4-a {
+    margin: -8.4rem 0 0 0;
+    padding: 1.5rem 0 1.5rem 0;
+}
+.gs4 {
+    margin: 0rem 0 0 0;
+    padding: .4rem 1rem;
+}
+
+.line {
+    width: 2.2rem;
+    padding: .3rem 0 1rem 0;
+}
+
+
+@media screen and (min-width: 375px) {
+    .down-arrow {
+        padding: 1rem 0 0 0;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .ver-p1, .ver-p2 {
+        font-size: 2.4rem;
+    }
+}
+
+@media screen and (min-width: 1024px) {
+
+    .sub-main-section-hd {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: row-reverse;
+        /* display: grid;
+        align-items: center;
+        justify-content: center;
+        grid-template-columns: repeat(2, 50%);
+        grid-template-rows: repeat(1, 50px); */
+    }
+
+    .line {
+        display: none;
+    }
+
+    .section-hd {
+        top: 6rem;
+        padding: 0 0 0 2rem;
+        text-align: left;
+    }
+
+    .section-hd-b2 {
+        width: 50%;
+    }
+
+    .section-hd-b {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .section-hd h1 {
+        color: #fff;
+        font-weight: bold;
+        font-size: 2.4rem;
+        padding: 0px 0px 20px 10px;
+    }
+
+    .game-select {
+        font-size: .8rem;
+    }
+
+    .verify-top {
+        float: left;
+        padding: 1.4rem 0rem 0 2.2rem;
+    }
+
+    .verify-bt h2 {
+        text-align: center;
+    }
+
+    .hd-sub-text {
+        padding: 0rem 0 0 1rem;
+    }
+    .hd-sub-text p {
+        font-size: 1.4rem;
+    }
+
+    .bul-pt {
+        list-style: none;
+    }
+
+    .hd-sub-text-2 {
+        width: 120%;
+        padding: 2rem 0 0 1rem;
+    }
+
+    .sub-text-hd-2 {
+        color: #fff;
+        font-size: 1.8rem;
+        display: inline;
+    }
+    .sub-text-hd-3 {
+        color: #fff;
+        font-size: 1.8em;
+        display: inline;
+    }
+
+    .gs1 {
+        margin: 1.5rem 0 1rem 0;
+    }
+
+    .gs2-a {
+        margin: 0rem 0 0 0;
+    }
+
+    .gs3 {
+        margin: .5rem 0 0 0;
+        padding: .45rem 1rem;
+    }
+
+    .gs4-a {
+        margin: -8rem 0 0 0;
+    }
+    
+    .img-box p {
+        color: #fff;
+    }
+
+    .s2-img-3 {
+        width: 25rem;
+        border-radius: 10px;
+    }
+}
+</style>
+    
+    <title>Player VerifyIt</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="under-nav">
+                <div class="lwv-back">
+                    <a href="/">
+                        <img src="../img/lwv-square-logo.png" alt="" class="lwv-img">
+                    </a>
+                </div>
+                <a href="../aboutus.html" class="nav-h3-a">
+                    <p>About Us</p>
+                </a>
+                <!-- <div class="verify">
+                    <div class="sub-ver-back">
+                        <div class="ver-checkbox">
+                            <img src="img/check-mark.png" alt="" class="ver-check">
+                        </div>
+                        <p class="ver-p1">E R I F Y</p>
+                        <p class="ver-p2">I T !</p>
+                    </div>
+                </div> -->
+                <!-- <div class="nav-menu-blk">
+                    <a href="#">
+                        <img src="img/menu.png" alt="" class="nav-menu">
+                    </a>
+                </div> -->
+            </div>
+        </nav>
+
+        <div class="main-section-hd-2" id="main-section-hd-id-2">
+            <div class="sub-main-section-hd sub-main-section-hd-2" id="sub-main-section-hd-id-2">
+                <div class="section-hd section-hd-b">
+                    <div class="verify verify-bt">
+                        <h2>P L A Y</h2>
+                        <div class="sub-ver-back sub-ver-back-2">
+                            <div class="ver-checkbox">
+                                <img src="../img/check-mark.png" alt="" class="ver-check">
+                            </div>
+                            <p class="ver-p1">E R I F Y</p>
+                            <p class="ver-p2">I T ! <span class="hex">&#8482;</span></p>
+                        </div>
+                    </div>
+                    <div class="icons">
+                        <img src="../img/down-arrow.png" alt="" class="down-arrow down-arrow-2" id="down-arrow-id">
+                        <img src="../img/close.png" alt="" class="close" id="close-id">
+                    </div>
+                    <div class="game-selections">
+                            <div class="game-select sub-gs1" id="sub-gs1-id">
+                                <h2>Get Started</h2>
+                            </div>
+                            <div class="game-selections sub-game-selections" id="sub-game-selections-id">
+                            <a href="../game/game-setup">
+                                <div class="game-select gs1">
+                                    <h2>Play a Single Player Game</h2>
+                                </div>
+                            </a>
+                            <a href="../game/game-setup/#multiplayer" class="gs2-a">
+                                <div class="game-select gs2">
+                                    <h2>Start a Multiplayer Game</h2>
+                                </div>
+                            </a>
+                            <a href="../game/" class="gs3-a">
+                                <div class="game-select gs3">
+                                    <h2>Join a Multiplayer Game</h2>
+                                </div>
+                            </a>
+                        </div>
+                        <a href="../game/#gameName=LWV Demo" class="gs4-a" id="gs4-id">
+                            <div class="game-select gs4">
+                                <h2>Play a Demo</h2>
+                            </div>
+                        </a>
+                    </div>
+                    <img src="../img/line.png" alt="" class="line">
+                </div>
+                <!-- <img src="img/line.png" alt="" class="line"> -->
+                <div class="section-hd section-hd-b2">
+                    <h1 class="b-h1">Be an informed citizen</h1>
+                    <div class="img-box img-box-3">
+                        <img src="../img/image-3.jpg" alt="" class="s2-img-3 s2-img b2-img">
+                    </div>
+                    <div class="hd-sub-text">
+                        <ul class="bullets">
+                            <li class="sub-text-hd bul-pt">Engage in Civics in your community.</li>
+                            <li class="sub-text-hd bul-pt">Challenge your News Literacy skills.</li>
+                            <li class="sub-text-hd bul-pt">Exercise your voting rights.</li>
+                        </ul>
+                    </div>
+                    <div class="verify verify-top">
+                        <div class="sub-ver-back">
+                            <div class="ver-checkbox">
+                                <img src="../img/check-mark.png" alt="" class="ver-check">
+                            </div>
+                            <p class="ver-p1">E R I F Y</p>
+                            <p class="ver-p2">I T ! <span class="hex">&#8482;</span></p>
+                        </div>
+                    </div>
+                    <!-- <div class="section-hd-2">
+                        <div class="img-box img-box-1">
+                            <img src="img/image-1.jpg" alt="" class="s2-img-1 s2-img">
+                            <p class="tagline">an active citizen</p>
+                        </div>
+                        <div class="img-box img-box-2">
+                            <img src="img/image-2.jpg" alt="" class="s2-img-2 s2-img">
+                            <p class="tagline">an active citizen</p>
+                        </div>
+                        <div class="img-box img-box-3">
+                            <img src="img/image-3.jpg" alt="" class="s2-img-3 s2-img">
+                            <p class="tagline">an active citizen</p>
+                        </div>
+                    </div> -->
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- <main>
+        
+    </main> -->
+    <script src="script-test-play.js"></script>
+</body>
+</html>

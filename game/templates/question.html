@@ -1,0 +1,14 @@
+{%extends 'base.html'%}
+{%block title%}
+Question
+{%endblock%}
+{%block content%}<br>
+<div class="container">
+    <div class="text-right"><h5>&#11088; 100</h5></div>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: 25%"></div>
+</div>
+    <br><br>  
+{{engine.execute("Select question_content FROM question_rows").fetchall()[qnum][0]|safe}}
+</div>
+{%endblock%}
