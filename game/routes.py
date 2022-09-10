@@ -13,13 +13,27 @@ def join():
 if __name__=="__main__":
     app.run(debug=True)'''
 
-from game.load import *
+#from game.load import engine
 from game import app
 from flask import render_template, redirect,url_for, flash, request
 #from game.models import
 from game.forms import JoinForm
 from game import db
+from sqlalchemy import Column, Integer, Float, Date, String, VARCHAR, select, MetaData
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from flask_login import login_user,logout_user, login_required, current_user
+try:
+    engine = create_engine(
+        'sqlite:///verifyit.db',echo=False)
+except:
+    print("Can't create 'engine")
+
+meta_data=MetaData()
+
+
+conn=engine.connect()
 @app.route("/")
 @app.route("/home")
 def index():
