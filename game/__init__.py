@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 
 import os
 app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'willset'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///verifyit.db'
 app.config['SECRET_KEY']=('59d7ded4b4d238a1b4ac23fa')
 db = SQLAlchemy(app)
 
