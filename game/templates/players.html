@@ -1,10 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
+{%extends 'base.html'%}
+{%block style%}
     @import url("https://fonts.googleapis.com/css?family=Roboto");
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap');
 
@@ -413,38 +408,10 @@ nav {
         border-radius: 10px;
     }
 }
-</style>
-    
-    <title>Player VerifyIt</title>
-</head>
-<body>
+{%endblock%}
+  {%block content%}
+
     <header>
-        <nav>
-            <div class="under-nav">
-                <div class="lwv-back">
-                    <a href="/">
-                        <img src="../img/lwv-square-logo.png" alt="" class="lwv-img">
-                    </a>
-                </div>
-                <a href="../aboutus.html" class="nav-h3-a">
-                    <p>About Us</p>
-                </a>
-                <!-- <div class="verify">
-                    <div class="sub-ver-back">
-                        <div class="ver-checkbox">
-                            <img src="img/check-mark.png" alt="" class="ver-check">
-                        </div>
-                        <p class="ver-p1">E R I F Y</p>
-                        <p class="ver-p2">I T !</p>
-                    </div>
-                </div> -->
-                <!-- <div class="nav-menu-blk">
-                    <a href="#">
-                        <img src="img/menu.png" alt="" class="nav-menu">
-                    </a>
-                </div> -->
-            </div>
-        </nav>
 
         <div class="main-section-hd-2" id="main-section-hd-id-2">
             <div class="sub-main-section-hd sub-main-section-hd-2" id="sub-main-section-hd-id-2">
@@ -465,24 +432,10 @@ nav {
                     </div>
                     <div class="game-selections">
                             <div class="game-select sub-gs1" id="sub-gs1-id">
-                                <h2>Get Started</h2>
+                                <h2><a class="nav-link" style="color:#FFFFFF" href="/join" >Get Started</a></h2>
                             </div>
                             <div class="game-selections sub-game-selections" id="sub-game-selections-id">
-                            <a href="../game/game-setup">
-                                <div class="game-select gs1">
-                                    <h2>Play a Single Player Game</h2>
-                                </div>
-                            </a>
-                            <a href="../game/game-setup/#multiplayer" class="gs2-a">
-                                <div class="game-select gs2">
-                                    <h2>Start a Multiplayer Game</h2>
-                                </div>
-                            </a>
-                            <a href="../game/" class="gs3-a">
-                                <div class="game-select gs3">
-                                    <h2>Join a Multiplayer Game</h2>
-                                </div>
-                            </a>
+
                         </div>
 <!--                        <a href="../game/#gameName=LWV Demo" class="gs4-a" id="gs4-id">-->
 <!--                            <div class="game-select gs4">-->
@@ -535,6 +488,6 @@ nav {
     <!-- <main>
         
     </main> -->
-    <script src="script-test-play.js"></script>
-</body>
-</html>
+
+
+{%endblock%}

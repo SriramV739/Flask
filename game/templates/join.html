@@ -6,6 +6,7 @@ Join a Game
 <div class="text-center"><h3>Join a Game</h3><br><br>
 <form method="POST">
     {{form.hidden_tag()}}
+    {{form.name(class="form-control",placeholder="Name")}}<br>
     {{form.code(class="form-control",placeholder="Enter a Game Code")}}<br>
     {{form.submit(class="btn btn-lg btn-block btn-primary")}}
 </form></div>
