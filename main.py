@@ -1,3 +1,3 @@
-from game import app
+from game import app,socketio
 if __name__ == '__main__':
-    app.run(debug=1)
+    socketio.run(app)

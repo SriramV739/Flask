@@ -3,5 +3,21 @@
 Waiting for Game to Start
 {%endblock%}
 {%block content%}
-{{game.code}}
+<div class="container">
+<h2>Share the following information with participants: <br>
+      &nbsp; &nbsp; &nbsp;Go to (website link) and use the code {{game.code}}</h2></div>
+<form method="POST" id="timeincrement">
+
+      </form>
+<p id="demo"></p>
+<script>
+      {%set ns=namespace({{game.time}})%}
+    var x = setInterval(function() {
+  // Display the result in the element with id="demo"
+
+  {%set ns.{{game.time}}=ns.{{game.time}}+1%}
+  document.getElementById("demo").innerHTML = {{game.time}};
+//document.getElementById("timeincrement").submit();
+}, 10000);
+</script>
 {%endblock%}
