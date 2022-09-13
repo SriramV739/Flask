@@ -49,7 +49,7 @@ def join_page():
     if form.submit.data and form.validate():
         if Games.query.filter_by(code=form.code.data).count()==0:
             flash("Invalid code",category="danger")
-        elif Players.query.filter_by(name=form.name.data).filter_by(game=Games.query.filter_by(code=form.code.data).first().id):
+        elif Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).count()!=0:
             flash("Name already in use. Please choose another name.", category="danger")
         else:
             db.session.add(Players(name=form.name.data,score=0,game=Games.query.filter_by(code=form.code.data).first().id
@@ -60,7 +60,7 @@ def join_page():
             return redirect(newlink)
     return render_template("join.html",form=form)
 @app.route("/waiting/<playerid>/<gameid>")
-def waiting_page(name,playerid,gameid):
+def waiting_page(playerid,gameid):
     return render_template("waitscreenplayer.html")
 @app.route("/question/<qnum>")
 def question_page(qnum):
@@ -94,6 +94,8 @@ def start_page():
         else:
             flash("Please choose a game.",category="danger")
     return render_template("start.html",engine=engine,form=form)
-@app.route("/waiting/host/<id>")
+@app.route("/waiting/host/<id>",methods=["GET","POST"])
 def waiting_host_page(id):
+    if request.method=="POST":
+        print("a")
     return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first())
