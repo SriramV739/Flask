@@ -1,2 +1,2 @@
-web: gunicorn --worker-class gevent -w 1 wsgi:app
+web:gunicorn main:app
 
