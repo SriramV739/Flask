@@ -18,7 +18,7 @@ from game import app
 from flask import render_template, redirect,url_for, flash, request
 #from game.models import
 from game.forms import JoinForm,StartGameForm
-from game import db
+from game import db,socketio
 from game.models import Games,Players
 from sqlalchemy import Column, Integer, Float, Date, String, VARCHAR, select, MetaData
 from sqlalchemy.ext.declarative import declarative_base
@@ -26,6 +26,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask_login import login_user,logout_user, login_required, current_user
 import random
+from flask_socketio import SocketIO,send, emit
+
 try:
     engine = create_engine(
         'sqlite:///verifyit.db',echo=False)
@@ -36,6 +38,7 @@ except:
 meta_data=MetaData()
 
 conn=engine.connect()
+
 @app.route("/")
 @app.route("/home")
 def index():
@@ -55,13 +58,13 @@ def join_page():
             db.session.add(Players(name=form.name.data,score=0,game=Games.query.filter_by(code=form.code.data).first().id
                                ,streak=0,submission="",result=""))
             db.session.commit()
-            newlink="/waiting/"+str(Players.query.filter_by(name=form.name.data).first().id)+"/"+\
-                    str(Games.query.filter_by(id=Players.query.filter_by(name=form.name.data).first().game).first().id)
+            newlink="/waiting/"+str(Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).first().id)+"/"+\
+                    str(Games.query.filter_by(code=form.code.data).first().id)
             return redirect(newlink)
     return render_template("join.html",form=form)
 @app.route("/waiting/<playerid>/<gameid>")
 def waiting_page(playerid,gameid):
-    return render_template("waitscreenplayer.html")
+    return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first())
 @app.route("/question/<qnum>")
 def question_page(qnum):
     return render_template("question.html",engine=engine,qnum=int(qnum))
@@ -96,6 +99,25 @@ def start_page():
     return render_template("start.html",engine=engine,form=form)
 @app.route("/waiting/host/<id>",methods=["GET","POST"])
 def waiting_host_page(id):
+    print(request.path)
     if request.method=="POST":
         print("a")
     return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first())
+
+# @socketio.on('text')
+# def text(data):
+#     print(data)
+#     #print("Message: "+msg.msg)
+#     emit('print',data)
+
+@socketio.on('newc')
+def newc(gid):
+    #print(gid)
+    #print(request.path.split('/')[2])
+    players=Players.query.filter_by(game=gid)
+    pnames=[]
+    for p in players:
+        pnames.append(p.name)
+    print(pnames)
+    emit('addnewc',{"players": pnames,"gameid":gid},broadcast=True)
+
