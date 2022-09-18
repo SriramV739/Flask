@@ -2,3 +2,27 @@
 {%block title%}
 Waiting for Game to Start
 {%endblock%}
+{%block content%}
+<div class="container" id="plist">
+    Waiting for the host to start game.
+
+    </div>
+    <script>
+    var gid="{{game.id}}"
+    var socket=io()
+    
+    window.onload=function(){
+        console.log(gid);
+        
+    // socket.on('connection',function() {
+        socket.emit('newc',gid);}
+    socket.on('addnewc',function(players){
+        //var pls=JSON.parse(players)
+        for (p in players){
+        
+        $("#plist").append(" <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>"+
+            players[p]+"</div></div>")
+    }})
+</script>
+</div>
+{%endblock%}
