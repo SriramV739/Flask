@@ -58,8 +58,8 @@ def join_page():
             db.session.add(Players(name=form.name.data,score=0,game=Games.query.filter_by(code=form.code.data).first().id
                                ,streak=0,submission="",result=""))
             db.session.commit()
-            newlink="/waiting/"+str(Players.query.filter_by(name=form.name.data).first().id)+"/"+\
-                    str(Games.query.filter_by(id=Players.query.filter_by(name=form.name.data).first().game).first().id)
+            newlink="/waiting/"+str(Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).first().id)+"/"+\
+                    str(Games.query.filter_by(code=form.code.data).first().id)
             return redirect(newlink)
     return render_template("join.html",form=form)
 @app.route("/waiting/<playerid>/<gameid>")
@@ -119,5 +119,5 @@ def newc(gid):
     for p in players:
         pnames.append(p.name)
     print(pnames)
-    emit('addnewc',pnames)
+    emit('addnewc',{"players": pnames,"gameid":gid},broadcast=True)
 
