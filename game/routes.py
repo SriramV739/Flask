@@ -17,7 +17,7 @@ if __name__=="__main__":
 from game import app
 from flask import render_template, redirect,url_for, flash, request
 #from game.models import
-from game.forms import JoinForm,StartGameForm
+from game.forms import JoinForm,StartGameForm,SubmitAnswerForm
 from game import db,socketio
 from game.models import Games,Players
 from sqlalchemy import Column, Integer, Float, Date, String, VARCHAR, select, MetaData
@@ -65,9 +65,23 @@ def join_page():
 @app.route("/waiting/<playerid>/<gameid>")
 def waiting_page(playerid,gameid):
     return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first())
-@app.route("/question/<qnum>")
-def question_page(qnum):
-    return render_template("question.html",engine=engine,qnum=int(qnum))
+@app.route("/question/<playerid>/<gameid>/<qnum>",methods=["GET","POST"])
+def question_page(playerid,gameid,qnum):
+    form=SubmitAnswerForm()
+    player=Players.query.filter_by(id=int(playerid)).first()
+    oqry="Select correct_choice FROM question_rows WHERE id=="+qnum
+    corrans=engine.execute(oqry).fetchall()[0][0]-1
+    print(corrans)
+    if form.submit.data:
+        ans=request.form.get("choice")
+        player.submission+=(ans+';')
+        if int(ans)==corrans:
+            player.streak+=1
+            player.result+="1;"
+        else:
+            player.streak=0
+            player.result+="0;"
+    return render_template("question.html",engine=engine,qnum=int(qnum),form=form)
 @app.route('/start',methods=["GET","POST"])
 def start_page():
     form=StartGameForm()
@@ -99,10 +113,14 @@ def start_page():
     return render_template("start.html",engine=engine,form=form)
 @app.route("/waiting/host/<id>",methods=["GET","POST"])
 def waiting_host_page(id):
-    print(request.path)
-    if request.method=="POST":
+    form=StartGameForm()
+    players=Players.query.filter_by(game=id)
+    pnames=[]
+    for p in players:
+        pnames.append(p.name)
+    if form.submit.data:
         print("a")
-    return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first())
+    return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first(),form=form,pnames=pnames)
 
 # @socketio.on('text')
 # def text(data):
@@ -120,4 +138,9 @@ def newc(gid):
         pnames.append(p.name)
     print(pnames)
     emit('addnewc',{"players": pnames,"gameid":gid},broadcast=True)
+
+@socketio.on('gamehasstarted')
+def gamehasstarted(gid):
+    print('ghs')
+    emit('gamehasstarted',gid,broadcast=True)
 
