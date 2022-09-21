@@ -30,6 +30,12 @@ console.log(data.players)
         $("#plist").append(" <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>"+
             data.players[p]+"</div></div>")
     }}})
+    socket.on('gamehasstarted',function(gameid){
+        if (gid==gameid){
+            
+            window.location.href="/home"
+        }
+    })
 </script>
 </div>
 {%endblock%}
