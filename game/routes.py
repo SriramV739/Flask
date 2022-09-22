@@ -64,24 +64,28 @@ def join_page():
     return render_template("join.html",form=form)
 @app.route("/waiting/<playerid>/<gameid>")
 def waiting_page(playerid,gameid):
-    return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first())
+    return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first()
+    ,player=Players.query.filter_by(id=playerid).first())
 @app.route("/question/<playerid>/<gameid>/<qnum>",methods=["GET","POST"])
 def question_page(playerid,gameid,qnum):
     form=SubmitAnswerForm()
     player=Players.query.filter_by(id=int(playerid)).first()
     oqry="Select correct_choice FROM question_rows WHERE id=="+qnum
     corrans=engine.execute(oqry).fetchall()[0][0]-1
-    print(corrans)
-    if form.submit.data:
+    if form.submitb.data:
+        print(request.form.get("timeleft"))
         ans=request.form.get("choice")
         player.submission+=(ans+';')
         if int(ans)==corrans:
+            player.score+=float(request.form.get("timeleft"))*10
             player.streak+=1
             player.result+="1;"
         else:
             player.streak=0
             player.result+="0;"
-    return render_template("question.html",engine=engine,qnum=int(qnum),form=form)
+        db.session.commit()
+    return render_template("question.html",engine=engine,qnum=int(qnum),form=form
+    ,player=player)
 @app.route('/start',methods=["GET","POST"])
 def start_page():
     form=StartGameForm()

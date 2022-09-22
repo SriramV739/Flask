@@ -5,27 +5,52 @@ Question
 
 {%block content%}<br>
 <div class="container">
-    <div class="text-right"><h5>&#11088; 100</h5></div>
+  <div class="row" style="margin-top:20px; margin-left:20px;">
+    <div class="col-10">
+    <div class="text-right" style="display: inline"><h5>&#11088; {{player.score}}</h5></div><div>
 <div class="progress">
   <div class="progress-bar" role="progressbar" style="width: 25%"></div>
 </div>
     <br><br>  
 <h5>{{engine.execute("Select question_content FROM question_rows").fetchall()[qnum][0]|safe}}</h5>
-<form method="POST">
+<form method="POST" id="qform">
   {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[qnum][0].split('\n')[1:-2]%}
   {%for c in range(choices|length)%}
   
   <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{choices[c][5:-5]|safe}}</h5>
   {%endfor%}
-    {{form.submit(class="btn btn-lg btn-primary p-4")}}
+  <input id="timeleft" name="timeleft" type="hidden">
+    {{form.submitb(class="btn btn-lg btn-primary p-4")}}
 </form>
 
+</div></div>
+<div class="col-2">
+  <br><br><br><br>
+  <div class="text-center" style="display: inline"><h3>&#9200;</h3><h3 id="timer"></h3></div>
 </div>
+<script>
+  var time=30;
+var x = setInterval(function() {
+document.getElementById("timer").innerHTML = Math.round(time)
 
+$("#timeleft").val(Math.round(time*100)/100)
+time-=0.1;
+
+if (time <= 0) {
+  console.log('h')
+  clearInterval(x);
+  document.getElementById("qform").submit();
+  document.getElementById("timer").innerHTML = "Time is up!";
+
+}
+}, 100);
+
+
+</script>
 {%endblock%}
 {%block style%}
       body {
-      background-color: #FFFFFF;
+      background-color: #89C4FF;
       color: black
       }
 {%endblock%}
