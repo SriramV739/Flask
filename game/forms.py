@@ -8,4 +8,4 @@ class JoinForm(FlaskForm):
 class StartGameForm(FlaskForm):
     submit = SubmitField(label='Start')
 class SubmitAnswerForm(FlaskForm):
-    submit=SubmitField(label='Submit')
+    submitb=SubmitField(label='Submit')
