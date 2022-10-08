@@ -1,0 +1,31 @@
+{%extends 'base.html'%}
+{%block title%}
+Leaderboard
+{%endblock%}
+{%block content%}
+<div class="container" id="plist">
+    {%for player in ps%}
+    <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>
+        <div class="row" style="margin-top:20px; margin-left:20px;">
+        <div class="col-8">{{player.name}}</div>
+        <div class="col-4">{{player.score}}</div></div>
+          </div></div>
+          {%endfor%}
+</div>
+<script>
+    var socket=io({'multiplex': false})
+
+var gid="{{gameid}}"
+socket.on('gotonextq',function(gameid){
+    if (gid==gameid){  
+          var locto="/question/{{playerid}}/"+gid+"/"+"{{qnum|int+1}}";
+          window.location.href=locto;
+    }
+})
+socket.on('gotofinal',function(gameid){
+    if (gid==gameid){
+        var locto="/podium/"+gid
+        window.location.href=locto;
+    }})
+</script>
+{%endblock%}

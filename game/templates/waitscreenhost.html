@@ -47,7 +47,9 @@ Waiting for Game to Start
       // console.log('Received message');
       // });
       $('#startform').on('click',function() {
-            socket.emit('gamehasstarted',gid)})
+            socket.emit('gamehasstarted',gid);
+            var locto="/questionhost/"+gid+"/0";
+            window.location.href=locto;})
       // socket.emit('text',$('#myMessage').val());
       // $('#myMessage').val('')});
 </script>

@@ -33,7 +33,7 @@ console.log(data.players)
     socket.on('gamehasstarted',function(gameid){
         if (gid==gameid){
             
-            window.location.href="/question/{{player.id}}/{{game.id}}/{{game.questions.split(',')[0]}}"
+            window.location.href="/question/{{player.id}}/{{game.id}}/0"
         }
     })
 </script>

@@ -1,0 +1,25 @@
+{%extends 'base.html'%}
+{%block title%}
+More Information
+{%endblock%}
+{%block content%}
+<h3>{{q|safe}}</h3>
+<script>
+      var socket=io({'multiplex': false})
+  
+  var gid="{{game.id}}"
+  socket.on('gotolb',function(gameid){
+      if (gid==gameid){  
+            var locto="/leaderboardp/{{playerid}}/"+gid+"/"+"{{qnum}}";
+            window.location.href=locto;
+
+      }
+  })
+  </script>
+{%endblock%}
+{%block style%}
+      body {
+      background-color: #89C4FF;
+      color: black
+      }
+{%endblock%}

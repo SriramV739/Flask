@@ -9,12 +9,13 @@ Question
     <div class="col-10">
     <div class="text-right" style="display: inline"><h5>&#11088; {{player.score}}</h5></div><div>
 <div class="progress">
-  <div class="progress-bar" role="progressbar" style="width: 25%"></div>
+  
+  <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
 </div>
     <br><br>  
-<h5>{{engine.execute("Select question_content FROM question_rows").fetchall()[qnum][0]|safe}}</h5>
+<h5>{{engine.execute("Select question_content FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0]|safe}}</h5>
 <form method="POST" id="qform">
-  {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[qnum][0].split('\n')[1:-2]%}
+  {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2]%}
   {%for c in range(choices|length)%}
   
   <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{choices[c][5:-5]|safe}}</h5>
@@ -29,22 +30,40 @@ Question
   <div class="text-center" style="display: inline"><h3>&#9200;</h3><h3 id="timer"></h3></div>
 </div>
 <script>
+  var gid="{{game.id}}"
+  var socket=io({'multiplex': false})
+
   var time=30;
+socket.on('tleft',function(data){
+  if (gid==data.gid){
+  console.log(data.time)
+    time=data.time}
+})
+socket.on('timeup',function(gameid){
+  console.log('h')
+  if (gid==gameid){
+    $("#timeleft").val(0)
+    document.getElementById("qform").submit();
+    //var locto="{{'/resultplayer/'~player.id~'/'~game.id~'/'~(qnum)}}"
+    //console.log(locto)
+    //window.location.href=locto
+  }
+  })
 var x = setInterval(function() {
 document.getElementById("timer").innerHTML = Math.round(time)
 
 $("#timeleft").val(Math.round(time*100)/100)
-time-=0.1;
+//time-=0.1;
 
-if (time <= 0) {
-  console.log('h')
-  clearInterval(x);
-  document.getElementById("qform").submit();
-  document.getElementById("timer").innerHTML = "Time is up!";
+// if (time <= 0) {
+//   console.log('h')
+//   clearInterval(x);
+//   document.getElementById("qform").submit();
+//   document.getElementById("timer").innerHTML = "Time is up!";
 
-}
+// }
 }, 100);
-
+  
 
 </script>
 {%endblock%}

@@ -1,0 +1,94 @@
+{%extends 'base.html'%}
+{%block content%}
+<style>
+  body {
+  width: clamp(340px, 90%, 920px);
+  margin: auto;
+}
+body {
+  color: var(--fore-color);
+  background: var(--back-color);
+}
+*{
+  font-family: Quicksand, arial, sans, sans-serif;
+  font-size: max(1.2rem, 1.5vw);
+  margin: 0;
+  padding: 0;
+  font-size: 3.0vh;
+}
+html, * {
+  line-height: 1.5;
+}
+:root {
+  --button-hover-back-color: f8f8f8;
+  --button-hover-border-color: 5352ED;
+}
+:root {
+  --animate-duration: 1s;
+  --animate-delay: 1s;
+  --animate-repeat: 1;
+}
+.choice, .final-btn {
+  width: 95%;
+  background: #f8f8f8;
+  border-color: #BABABA;
+  border-radius: 8px;
+  border-width: 2px;
+  color: #404144;
+  font-weight: 600;
+}
+</style>
+
+
+
+
+<script>
+    function processButton(id){
+        let val=document.getElementById(id).dataset.no;
+        let ans=document.getElementById("choice1").dataset.no;
+        //console.log(ans);
+        if(ans==val){
+            location.assign("{{qnum+1}}")
+        }
+    }
+</script>
+<div class="container">
+    <div class="text-right"><h5>&#11088; 100</h5></div>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: 25%"></div>
+</div>
+    <br><br>  
+
+
+<div class="row">
+  <!-- <div class="color-bar col-sm-1"></div> -->
+  <div id="question-content" class="col-sm-12" >
+    {{engine.execute("Select question_content FROM question_rows").fetchall()[qnum][0]|safe}}
+  </div>
+</div>
+
+<!--<button id="b1" name="bt1" onclick="changeColor()" class="button button1">Green</button>
+<button id="b2" onclick="changeColor1()" disabled="true" class="button button2">Blueabc </button>
+<button id="b3" disabled>A12</button>
+<button id="b4">A22</button>
+-->
+<div>
+    <h1 id="choice1" data-no={{answer}}>{{answer}}</h1>
+</div>
+</div>
+
+{%for i in range(0,len)%}  
+  <button id={{i+1}} 
+  onclick=processButton(id) data-no={{i+1}} class="choice" >
+  
+  {{choices[i]}}
+
+  </button>
+  <br><br> 
+  <!-- <p><input type ="submit" value={{choices[i]}} /> </p>-->
+  {%endfor%}
+
+
+
+
+{%endblock%}
