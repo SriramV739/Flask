@@ -1,0 +1,25 @@
+{%extends 'base.html'%}
+{%block title%}
+Leaderboard
+{%endblock%}
+{%block content%}
+<h3>The game has finished!</h3>
+<div class="container" id="plist">
+    {%for i in range(ps.count())%}
+    <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>
+        <div class="row" style="margin-top:20px; margin-left:20px;">
+            {%if i==0%}
+            <div class="col-1"><h3>&#x1F947;</h3></div>
+            {%endif%}
+            {%if i==1%}
+            <div class="col-1"><h3>&#x1F948;</h3></div>
+            {%endif%}
+            {%if i==2%}
+            <div class="col-1"><h3>&#x1F949;</h3></div>
+            {%endif%}
+        <div class="col-7">{{ps[i].name}}</div>
+        <div class="col-4">{{ps[i].score}}</div></div>
+          </div></div>
+          {%endfor%}
+</div>
+{%endblock%}

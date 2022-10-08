@@ -1,0 +1,23 @@
+{%extends 'base.html'%}
+{%block title%}
+More Information
+{%endblock%}
+{%block content%}
+<h3>{{q|safe}}</h3>
+<button class="btn btn-lg btn-primary p-4" id="startform">Continue</button>
+<script>
+    var socket=io({'multiplex': false})
+
+var gid="{{game.id}}"
+    $('#startform').on('click',function() {
+            socket.emit('gotolb',gid);
+            var locto="/leaderboardh/"+gid+"/"+"{{qnum}}";
+            window.location.href=locto;})
+</script>
+{%endblock%}
+{%block style%}
+      body {
+      background-color: #89C4FF;
+      color: black
+      }
+{%endblock%}

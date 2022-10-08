@@ -27,7 +27,11 @@ from sqlalchemy.orm import sessionmaker
 from flask_login import login_user,logout_user, login_required, current_user
 import random
 from flask_socketio import SocketIO,send, emit
-
+def remove_html_tags(text):
+    """Remove html tags from a string"""
+    import re
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
 try:
     engine = create_engine(
         'sqlite:///verifyit.db',echo=False)
@@ -66,26 +70,48 @@ def join_page():
 def waiting_page(playerid,gameid):
     return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first()
     ,player=Players.query.filter_by(id=playerid).first())
+@app.route("/questionhost/<gameid>/<qnum>",methods=["GET","POST"])
+def question_host_page(gameid,qnum):
+    game=Games.query.filter_by(id=gameid).first()
+    return render_template("questionhost.html",engine=engine,qnum=int(qnum),
+    game=game)
 @app.route("/question/<playerid>/<gameid>/<qnum>",methods=["GET","POST"])
 def question_page(playerid,gameid,qnum):
     form=SubmitAnswerForm()
+    qnum=int(qnum)
+    game=Games.query.filter_by(id=gameid).first()
     player=Players.query.filter_by(id=int(playerid)).first()
-    oqry="Select correct_choice FROM question_rows WHERE id=="+qnum
+    oqry="Select correct_choice FROM question_rows WHERE id=="+str(game.questions.split(',')[qnum])
     corrans=engine.execute(oqry).fetchall()[0][0]-1
-    if form.submitb.data:
-        print(request.form.get("timeleft"))
+    if request.method=="POST" and request.form.get("timeleft") is not None:
+        timel=float(request.form.get("timeleft"))
+        print(timel+1000000)
         ans=request.form.get("choice")
+        if ans is None or timel==0:
+            ans=""
+        print(ans)
         player.submission+=(ans+';')
-        if int(ans)==corrans:
-            player.score+=float(request.form.get("timeleft"))*10
-            player.streak+=1
-            player.result+="1;"
+        if ans!="":
+            if int(ans)==corrans:
+                player.score+=float(request.form.get("timeleft"))*10
+                player.streak+=1
+                player.result+="1;"
+            else:
+                player.streak=0
+                player.result+="0;"
         else:
             player.streak=0
             player.result+="0;"
         db.session.commit()
+        #rt="/submittedanswer/"+str(playerid)+"/"+str(gameid)+"/"+str(qnum)
+        if timel>0:
+            rt="/submittedanswer/"+str(playerid)+"/"+str(gameid)+"/"+str(qnum)
+            return redirect(rt)
+        else:
+            rt="/resultplayer/"+str(player.id)+'/'+str(game.id)+'/'+str(qnum)
+            return redirect(rt)
     return render_template("question.html",engine=engine,qnum=int(qnum),form=form
-    ,player=player)
+    ,player=player,game=game)
 @app.route('/start',methods=["GET","POST"])
 def start_page():
     form=StartGameForm()
@@ -126,12 +152,80 @@ def waiting_host_page(id):
         print("a")
     return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first(),form=form,pnames=pnames)
 
+@app.route("/submittedanswer/<playerid>/<gameid>/<qnum>")
+def submitted_answer_page(playerid,gameid,qnum):
+    game=Games.query.filter_by(id=gameid).first()
+    return render_template("submittedanswer.html",game=game,qnum=int(qnum),playerid=playerid)
+
+@app.route("/resultplayer/<playerid>/<gameid>/<qnum>")
+def player_result_page(playerid,gameid,qnum):
+    qnum=int(qnum)
+    game=Games.query.filter_by(id=gameid).first()
+    oqry="Select correct_choice FROM question_rows WHERE id=="+str(game.questions.split(',')[qnum])
+    corrans=engine.execute(oqry).fetchall()[0][0]-1
+    subnums=[0]*len(engine.execute("Select choices FROM question_rows").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
+    for player in Players.query.filter_by(game=gameid):
+        if player.submission.split(';')[qnum]!="":
+            subnums[int(player.submission.split(';')[qnum])]+=1
+
+    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
+    if pans!="":
+        pans=int(pans)
+    print("-"+str(pans))
+    return render_template("resultplayer.html",player=Players.query.filter_by(id=playerid).first(),game=game,qnum=int(qnum)
+    ,corrans=corrans,subnums=subnums,pans=pans,engine=engine)
+
+@app.route("/leaderboardp/<playerid>/<gameid>/<qnum>")
+def leaderboard_player_page(playerid,gameid,qnum):
+    ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
+    return render_template("leaderboardplayer.html",ps=ps,playerid=playerid,gameid=gameid,qnum=int(qnum))
+
+@app.route("/leaderboardh/<gameid>/<qnum>")
+def leaderboard_host_page(gameid,qnum):
+    ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
+    return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum))
+
+@app.route("/playerfollowup/<playerid>/<gameid>/<qnum>")
+def followup_player_page(playerid,gameid,qnum):
+    game=Games.query.filter_by(id=gameid).first()
+    q=engine.execute("Select followup FROM question_rows").fetchall()[int(game.questions.split(',')[int(qnum)])][0]
+    return render_template("followupplayer.html",q=q,playerid=playerid,gameid=gameid,qnum=qnum,game=game)
+
+@app.route("/resulthost/<gameid>/<qnum>")
+def host_result_page(gameid,qnum):
+    qnum=int(qnum)
+    game=Games.query.filter_by(id=gameid).first()
+    oqry="Select correct_choice FROM question_rows WHERE id=="+str(game.questions.split(',')[qnum])
+    corrans=engine.execute(oqry).fetchall()[0][0]-1
+    subnums=[0]*len(engine.execute("Select choices FROM question_rows").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
+    for player in Players.query.filter_by(game=gameid):
+        if player.submission.split(';')[qnum]!="":
+            subnums[int(player.submission.split(';')[qnum])]+=1
+    return render_template("resulthost.html",game=game,qnum=int(qnum)
+    ,corrans=corrans,subnums=subnums,engine=engine)
+
+@app.route("/hostfollowup/<gameid>/<qnum>")
+def followup_host_page(gameid,qnum):
+    game=Games.query.filter_by(id=gameid).first()
+    q=engine.execute("Select followup FROM question_rows").fetchall()[int(game.questions.split(',')[int(qnum)])][0]
+    return render_template("followuphost.html",q=q,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum))
+
+@app.route("/podium/<gameid>")
+def podium_page(gameid):
+    ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
+    return render_template("podium.html",ps=ps,game=Games.query.filter_by(id=gameid).first())
+
 # @socketio.on('text')
 # def text(data):
 #     print(data)
 #     #print("Message: "+msg.msg)
 #     emit('print',data)
-
+# @app.route("/question/<qnum>",methods=["GET","POST"])
+# def question_page(qnum):
+#     choices=remove_html_tags(engine.execute("Select choices FROM question_rows").fetchall()[int(qnum)][0]).split('\n')[1:-2]
+#     answer=(engine.execute("Select correct_choice FROM question_rows").fetchall()[int(qnum)][0])
+#     print(answer)
+#     return render_template("temp.html",engine=engine,qnum=int(qnum),len=len(choices),choices=choices,answer=answer)
 @socketio.on('newc')
 def newc(gid):
     #print(gid)
@@ -148,3 +242,29 @@ def gamehasstarted(gid):
     print('ghs')
     emit('gamehasstarted',gid,broadcast=True)
 
+@socketio.on('tleft')
+def timeleft(data):
+    #print('fasdf')
+    emit('tleft',data,broadcast=True)
+
+@socketio.on('timeup')
+def timeup(gid):
+    
+    emit('timeup',gid,broadcast=True)
+
+@socketio.on('gotofollowup')
+def gotofollowup(gid):
+    emit('gotofollowup',gid,broadcast=True)
+
+@socketio.on('gotolb')
+def gotofollowup(gid):
+    emit('gotolb',gid,broadcast=True)
+
+@socketio.on('gotonextq')
+def gotofollowup(data):
+    game=Games.query.filter_by(id=data["gid"]).first()
+    print(data["qon"],len(game.questions.split(','))-2)
+    if int(data["qon"])==len(game.questions.split(','))-2:
+        emit('gotofinal',data["gid"],broadcast=True)
+    else:
+        emit('gotonextq',data["gid"],broadcast=True)

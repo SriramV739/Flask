@@ -1,0 +1,16 @@
+{%extends 'base.html'%}
+{%block title%}
+Waiting for Other Players
+{%endblock%}
+{%block content%}
+<h2>Waiting for other players to finish.</h2>
+<script>
+    var gid="{{game.id}}"
+  var socket=io({'multiplex': false})
+  socket.on('timeup',function(data){
+    var locto="{{'/resultplayer/'~playerid~'/'~game.id~'/'~(qnum)}}"
+    console.log(locto)
+    window.location.href=locto
+  })
+</script>
+{%endblock%}

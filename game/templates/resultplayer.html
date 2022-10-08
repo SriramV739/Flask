@@ -1,0 +1,75 @@
+{%extends 'base.html'%}
+{%block title%}
+Results
+{%endblock%}
+{%block content%}
+{{engine.execute("Select question_content FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0]|safe}}
+{%if corrans==pans%}
+{%set sty="bg-success"%}
+{%else%}
+{%set sty="bg-danger"%}
+{%endif%}
+<table class="table table-hover {{sty}}">
+    <thead>
+        <tr>
+            <!-- Your Columns HERE -->
+            <th scope="col">Your Answer</th>
+            <th scope="col">Correct Answer</th>
+            <th scope="col"># of Players</th>
+
+            <th scope="col">Answer Choice</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Your rows inside the table HERE: -->
+        {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2]%}
+
+        {% for i in range(engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2] |length) %}
+        
+        <tr>
+                <td>{%if i==pans%}
+                        ->
+                    {%endif%}
+                </td>
+                <td>{%if i==corrans%}
+                    ->
+                {%endif%}</td>
+
+                <td>{{subnums[i]}}</td>
+                <td><p>{{choices[i][5:-5]|safe}}</p></td>
+                    
+
+
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+<script>
+    var socket=io({'multiplex': false})
+
+var gid="{{game.id}}"
+socket.on('gotofollowup',function(gameid){
+    if (gid==gameid){  
+          var locto="/playerfollowup/{{player.id}}/"+gid+"/"+"{{qnum}}";
+          window.location.href=locto;
+
+    }
+})
+</script>
+{%endblock%}
+{%block style%}
+{%if corrans==pans%}
+      body {
+      background-color: #15d61f;
+      color: black
+      }
+{%else%}
+body {
+    background-color: #f76248;
+    color: black
+    }
+{%endif%}
+{%endblock%}
+
