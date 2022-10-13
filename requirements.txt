@@ -20,6 +20,7 @@ python-socketio==5.7.1
 simple-websocket==0.7.0
 six==1.16.0
 SQLAlchemy==1.4.41
+typing_extensions==4.4.0
 Werkzeug==2.2.2
 wsproto==1.2.0
 WTForms==3.0.1
