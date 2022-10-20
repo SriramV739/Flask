@@ -18,10 +18,10 @@ Question
   {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2]%}
   {%for c in range(choices|length)%}
   
-  <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{choices[c][5:-5]|safe}}</h5>
+  <h5><button name="choice" value="{{c}}" class="choice" onclick=processButton(id)>&nbsp;{{choices[c][5:-5]|safe}}</h5>
   {%endfor%}
   <input id="timeleft" name="timeleft" type="hidden">
-    {{form.submitb(class="btn btn-lg btn-primary p-4")}}
+    <!-- {form.submitb(class="btn btn-lg btn-primary p-4") -->
 </form>
 
 </div></div>
@@ -30,6 +30,10 @@ Question
   <div class="text-center" style="display: inline"><h3>&#9200;</h3><h3 id="timer"></h3></div>
 </div>
 <script>
+  function processButton(id){
+    document.getElementById("qform").val(id);
+    document.getElementById("qform").submit();
+  }
   var gid="{{game.id}}"
   var socket=io({'multiplex': false})
 
@@ -68,6 +72,15 @@ $("#timeleft").val(Math.round(time*100)/100)
 </script>
 {%endblock%}
 {%block style%}
+.choice, .final-btn {
+  width: 95%;
+  background: #f8f8f8;
+  border-color: #BABABA;
+  border-radius: 8px;
+  border-width: 2px;
+  color: #404144;
+  font-weight: 600;
+}
       body {
       background-color: #89C4FF;
       color: black

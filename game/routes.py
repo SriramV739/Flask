@@ -93,7 +93,7 @@ def question_page(playerid,gameid,qnum):
         player.submission+=(ans+';')
         if ans!="":
             if int(ans)==corrans:
-                player.score+=float(request.form.get("timeleft"))*10
+                player.score+=500+float(request.form.get("timeleft"))*10+player.streak*20
                 player.streak+=1
                 player.result+="1;"
             else:
@@ -165,10 +165,15 @@ def player_result_page(playerid,gameid,qnum):
     corrans=engine.execute(oqry).fetchall()[0][0]-1
     subnums=[0]*len(engine.execute("Select choices FROM question_rows").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
     for player in Players.query.filter_by(game=gameid):
-        if player.submission.split(';')[qnum]!="":
-            subnums[int(player.submission.split(';')[qnum])]+=1
-
-    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
+        try:
+            if player.submission.split(';')[qnum]!="":
+                subnums[int(player.submission.split(';')[qnum])]+=1
+        except:
+            pass
+    try:
+        pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
+    except:
+        pans=""
     if pans!="":
         pans=int(pans)
     print("-"+str(pans))
@@ -199,8 +204,11 @@ def host_result_page(gameid,qnum):
     corrans=engine.execute(oqry).fetchall()[0][0]-1
     subnums=[0]*len(engine.execute("Select choices FROM question_rows").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
     for player in Players.query.filter_by(game=gameid):
-        if player.submission.split(';')[qnum]!="":
-            subnums[int(player.submission.split(';')[qnum])]+=1
+        try:
+            if player.submission.split(';')[qnum]!="":
+                subnums[int(player.submission.split(';')[qnum])]+=1
+        except:
+            pass
     return render_template("resulthost.html",game=game,qnum=int(qnum)
     ,corrans=corrans,subnums=subnums,engine=engine)
 
