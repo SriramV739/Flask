@@ -11,13 +11,13 @@ engine = create_engine('sqlite:///verifyit.db')
 
 metadata_obj = MetaData()
 
-author_rows = Table('author', metadata_obj,
+author = Table('author', metadata_obj,
     Column('name', String(64), primary_key=True),
     Column('tag_line', String(64)),
 )
 
 
-game_category_rows = Table('game_category', metadata_obj,
+game_category = Table('game_category', metadata_obj,
     Column('bug_path_name', String(64)),
     Column('text_color', String(64)),
     Column('background_color', String(64)),
@@ -28,7 +28,7 @@ game_category_rows = Table('game_category', metadata_obj,
 )
 
 
-game_leader_rows = Table('game_leader', metadata_obj,
+game_leader = Table('game_leader', metadata_obj,
     Column('city', String(64)),
     Column('leader_handle', String(64)),
     Column('current_play', Integer),
@@ -39,7 +39,7 @@ game_leader_rows = Table('game_leader', metadata_obj,
 )
 
 
-game_rows = Table('game', metadata_obj,
+game = Table('game', metadata_obj,
     Column('game_group', String(64)),
     Column('play_code', String(64)),
     Column('when', DateTime), #check again
@@ -49,7 +49,7 @@ game_rows = Table('game', metadata_obj,
 )
 
 
-play_rows = Table('play', metadata_obj,
+play = Table('play', metadata_obj,
     Column('game_leader', String(64)),
     Column('play_code', Boolean),
     Column('game_status', String(64)),
@@ -58,7 +58,7 @@ play_rows = Table('play', metadata_obj,
     Column('play', Integer),
 )
 
-question_rows = Table('question', metadata_obj,
+question = Table('question', metadata_obj,
     Column('last_modified', DateTime), #check date
     Column('question_content', String(500)), #have to redefine this String(512)
     Column('title', String(64)),
@@ -67,14 +67,14 @@ question_rows = Table('question', metadata_obj,
     Column('play', Integer),
 )
 
-source_rows = Table('source', metadata_obj,
+source = Table('source', metadata_obj,
     Column('name', String(64)),
     Column('hints', String(512)), #have to redefine this String(512)
     Column('description', String(512)), #check String(512)
 )
 
 
-status_rows = Table('status', metadata_obj,
+status = Table('status', metadata_obj,
     Column('name', String(64)),
 )
 #fix this entire entry

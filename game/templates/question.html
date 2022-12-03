@@ -13,13 +13,19 @@ Question
   <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
 </div>
     <br><br>  
-<h5>{{engine.execute("Select question_content FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0]|safe}}</h5>
+    {%set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
+<h5>{{engine.execute(qry).fetchall()[0][0]|safe}}</h5>
 <form method="POST" id="qform">
-  {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2]%}
+  {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
+  {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
+  {%set cc=namespace(curcat=0)%}
   {%for c in range(choices|length)%}
   
-  <h5><button name="choice" value="{{c}}" class="choice" onclick=processButton(id)>&nbsp;{{choices[c][5:-5]|safe}}</h5>
-  {%endfor%}
+  {%if choices[c][2:4]=="li"%}
+  <h5><button name="choice" value="{{cc.curcat}}" class="choice" onclick=processButton(id)>&nbsp;{{choices[c][5:-5]|safe}}</h5>
+    {%set cc.curcat=cc.curcat+1%}
+    {%endif%}
+    {%endfor%}
   <input id="timeleft" name="timeleft" type="hidden">
     <!-- {form.submitb(class="btn btn-lg btn-primary p-4") -->
 </form>

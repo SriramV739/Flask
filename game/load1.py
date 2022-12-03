@@ -12,10 +12,10 @@ from sqlalchemy import MetaData, Table, String, Boolean
 engine = create_engine('sqlite:///verifyit.db')
 metadata_obj = MetaData()
 
-file_name = "/Users/sriram/Downloads/Flask/csv/game_rows.csv" #sample CSV file used:  http://www.google.com/finance/historical?q=NYSE%3AT&ei=W4ikVam8LYWjmAGjhoHACw&output=csv
+file_name = "/Users/sriram/Downloads/Flask/csv/game.csv" #sample CSV file used:  http://www.google.com/finance/historical?q=NYSE%3AT&ei=W4ikVam8LYWjmAGjhoHACw&output=csv
 data = Load_Data(file_name) 
 
-civics_rows = Table('civics_rows', metadata_obj,
+civics = Table('civics', metadata_obj,
     Column('game_group', String, primary_key=True),
     Column('is_available_single_player', Boolean, nullable=False),
     Column('game_status', String(60)),
@@ -27,7 +27,7 @@ civics_rows = Table('civics_rows', metadata_obj,
 metadata_obj.create_all(engine)
 
 for i in data:
-            record = civics_rows(**{
+            record = civics(**{
                 #'date' : datetime.strptime(i[0], '%d-%b-%y').date(),
                 'game_group' : i[0],
                 'is_available_single_player' : i[1],
@@ -61,5 +61,5 @@ CREATE TABLE user_prefs(
         pref_value VARCHAR(100)
 )'''
 
-result = engine.execute('SELECT * FROM "civics_rows"')
+result = engine.execute('SELECT * FROM "civics"')
 print(result.fetchall())

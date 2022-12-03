@@ -1,0 +1,8 @@
+{%extends 'base.html'%}
+{%block content%}
+{{engine.execute("Select followup FROM question").fetchall()[qnum][0]|safe}}
+<button id=1 
+  onclick=window.location.assign("/singlequestion/{{qnum+1}}");>
+
+  Next
+{%endblock%}

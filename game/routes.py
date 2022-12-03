@@ -34,7 +34,8 @@ def remove_html_tags(text):
     return re.sub(clean, '', text)
 try:
     engine = create_engine(
-        'sqlite:///verifyit.db',echo=False)
+        'postgresql://postgres:princely-tunic-670@db.cqxvknmoofzuhxbonmoj.supabase.co:5432/postgres',echo=False)
+
 except:
     print("Can't create 'engine")
 #db.drop_all()
@@ -75,13 +76,26 @@ def question_host_page(gameid,qnum):
     game=Games.query.filter_by(id=gameid).first()
     return render_template("questionhost.html",engine=engine,qnum=int(qnum),
     game=game)
+
+@app.route("/singlequestion/<qnum>",methods=["GET","POST"])
+def question_page(qnum):
+    choices=remove_html_tags(engine.execute("Select choices FROM question").fetchall()[int(qnum)][0]).split('\n')[1:-2]
+    answer=(engine.execute("Select correct_choice FROM question").fetchall()[int(qnum)][0])
+    print(answer)
+    return render_template("question2.html",engine=engine,qnum=int(qnum),len=len(choices),choices=choices,answer=answer)
+
+@app.route("/followup/<qnum>",methods=["GET","POST"])
+def followup(qnum):
+    return render_template("followup.html",engine=engine,qnum=int(qnum))
+
+
 @app.route("/question/<playerid>/<gameid>/<qnum>",methods=["GET","POST"])
-def question_page(playerid,gameid,qnum):
+def multiquestion_page(playerid,gameid,qnum):
     form=SubmitAnswerForm()
     qnum=int(qnum)
     game=Games.query.filter_by(id=gameid).first()
     player=Players.query.filter_by(id=int(playerid)).first()
-    oqry="Select correct_choice FROM question_rows WHERE id=="+str(game.questions.split(',')[qnum])
+    oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     corrans=engine.execute(oqry).fetchall()[0][0]-1
     if request.method=="POST" and request.form.get("timeleft") is not None:
         timel=float(request.form.get("timeleft"))
@@ -93,7 +107,7 @@ def question_page(playerid,gameid,qnum):
         player.submission+=(ans+';')
         if ans!="":
             if int(ans)==corrans:
-                player.score+=500+float(request.form.get("timeleft"))*10+player.streak*20
+                player.score+=float(request.form.get("timeleft"))*10
                 player.streak+=1
                 player.result+="1;"
             else:
@@ -118,12 +132,14 @@ def start_page():
     if form.submit.data:
 
         if request.form.get("game_choice"):
-            gamechoice = int(request.form.get("game_choice"))
-            gamerow=engine.execute("Select * FROM game_category_rows").fetchall()[gamechoice]
-            qry="Select id FROM question_rows WHERE categories LIKE '%"+gamerow[6]+"%'"
+            gamechoice = str(request.form.get("game_choice"))
+            qry="Select * FROM game_category WHERE game='"+gamechoice+"'"
+            gamerow=engine.execute(qry).fetchall()[0]
+            print(gamerow)
+            qry="Select title FROM question WHERE categories LIKE '%%"+gamerow[6]+"%%'" ##might need to change to gamerow[1]
             pqs=list(engine.execute(qry).fetchall())
             #print(pqs)
-            qs=random.sample(pqs,gamerow[7])
+            qs=random.sample(pqs,gamerow[2])
             print(qs)
             qstr=""
             for element in qs:
@@ -161,19 +177,15 @@ def submitted_answer_page(playerid,gameid,qnum):
 def player_result_page(playerid,gameid,qnum):
     qnum=int(qnum)
     game=Games.query.filter_by(id=gameid).first()
-    oqry="Select correct_choice FROM question_rows WHERE id=="+str(game.questions.split(',')[qnum])
+    oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     corrans=engine.execute(oqry).fetchall()[0][0]-1
-    subnums=[0]*len(engine.execute("Select choices FROM question_rows").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
+    oqry="Select choices FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
+    subnums=[0]*len(engine.execute(oqry).fetchall()[0][0].split("\n"))
     for player in Players.query.filter_by(game=gameid):
-        try:
-            if player.submission.split(';')[qnum]!="":
-                subnums[int(player.submission.split(';')[qnum])]+=1
-        except:
-            pass
-    try:
-        pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
-    except:
-        pans=""
+        if player.submission.split(';')[qnum]!="":
+            subnums[int(player.submission.split(';')[qnum])]+=1
+
+    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
     if pans!="":
         pans=int(pans)
     print("-"+str(pans))
@@ -193,29 +205,33 @@ def leaderboard_host_page(gameid,qnum):
 @app.route("/playerfollowup/<playerid>/<gameid>/<qnum>")
 def followup_player_page(playerid,gameid,qnum):
     game=Games.query.filter_by(id=gameid).first()
-    q=engine.execute("Select followup FROM question_rows").fetchall()[int(game.questions.split(',')[int(qnum)])][0]
+    oqry="Select followup FROM question WHERE title='"+str(game.questions.split(',')[int(qnum)])+"'"
+    q=engine.execute(oqry).fetchall()[0][0]
     return render_template("followupplayer.html",q=q,playerid=playerid,gameid=gameid,qnum=qnum,game=game)
 
 @app.route("/resulthost/<gameid>/<qnum>")
 def host_result_page(gameid,qnum):
     qnum=int(qnum)
     game=Games.query.filter_by(id=gameid).first()
-    oqry="Select correct_choice FROM question_rows WHERE id=="+str(game.questions.split(',')[qnum])
+    oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     corrans=engine.execute(oqry).fetchall()[0][0]-1
-    subnums=[0]*len(engine.execute("Select choices FROM question_rows").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
+    print("c"+str(corrans))
+    oqry="Select choices FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
+    subnums=[0]*len(engine.execute(oqry).fetchall()[0][0].split("\n"))
+    #print("s"+str(len(subnums)))
+    #subnums=[0]*len(engine.execute("Select choices FROM question").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
     for player in Players.query.filter_by(game=gameid):
-        try:
-            if player.submission.split(';')[qnum]!="":
-                subnums[int(player.submission.split(';')[qnum])]+=1
-        except:
-            pass
+        if player.submission.split(';')[qnum]!="":
+            subnums[int(player.submission.split(';')[qnum])]+=1
+            #print(int(player.submission.split(';')[qnum]))
     return render_template("resulthost.html",game=game,qnum=int(qnum)
     ,corrans=corrans,subnums=subnums,engine=engine)
 
 @app.route("/hostfollowup/<gameid>/<qnum>")
 def followup_host_page(gameid,qnum):
     game=Games.query.filter_by(id=gameid).first()
-    q=engine.execute("Select followup FROM question_rows").fetchall()[int(game.questions.split(',')[int(qnum)])][0]
+    oqry="Select followup FROM question WHERE title='"+str(game.questions.split(',')[int(qnum)])+"'"
+    q=engine.execute(oqry).fetchall()[0][0]    
     return render_template("followuphost.html",q=q,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum))
 
 @app.route("/podium/<gameid>")
@@ -230,8 +246,8 @@ def podium_page(gameid):
 #     emit('print',data)
 # @app.route("/question/<qnum>",methods=["GET","POST"])
 # def question_page(qnum):
-#     choices=remove_html_tags(engine.execute("Select choices FROM question_rows").fetchall()[int(qnum)][0]).split('\n')[1:-2]
-#     answer=(engine.execute("Select correct_choice FROM question_rows").fetchall()[int(qnum)][0])
+#     choices=remove_html_tags(engine.execute("Select choices FROM question").fetchall()[int(qnum)][0]).split('\n')[1:-2]
+#     answer=(engine.execute("Select correct_choice FROM question").fetchall()[int(qnum)][0])
 #     print(answer)
 #     return render_template("temp.html",engine=engine,qnum=int(qnum),len=len(choices),choices=choices,answer=answer)
 @socketio.on('newc')

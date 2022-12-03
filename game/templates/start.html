@@ -9,12 +9,12 @@ Start a Game
 <div class="col-8">
 
 {%set cc=namespace(curcat="0")%}
-    {% for i in engine.execute("Select * FROM game_category_rows ORDER BY class").fetchall()%}
-{% if cc.curcat!=i[4]%}
-    <h2>{{i[4]}}</h2>
-    {%set cc.curcat=i[4]%}
+    {% for i in engine.execute("Select * FROM game_category ORDER BY class").fetchall()%}
+{% if cc.curcat!=i[6]%}
+    <h2>{{i[6]}}</h2>
+    {%set cc.curcat=i[6]%}
 {%endif%}
-    &nbsp;<input type="radio" name="game_choice" value="{{i[0]}}"> {{i[5]}} - {{i[7]}} questions<br>
+    &nbsp;<input type="radio" name="game_choice" value="{{i[0]}}"> {{i[0]}} - {{i[2]}} questions<br>
     {%endfor%}
 </div>
 <div class="col-4">

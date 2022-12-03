@@ -23,18 +23,18 @@ conn=engine.connect()
 
 #diff file paths
 
-csv_file_path="/Users/sriram/Downloads/Flask/csv/question_rows.csv"
-csv1_file_path="/Users/sriram/Downloads/Flask/csv/author_rows.csv"
-csv2_file_path="/Users/sriram/Downloads/Flask/csv/game_category_rows.csv"
-csv3_file_path="/Users/sriram/Downloads/Flask/csv/game_leader_rows.csv" 
-csv4_file_path="/Users/sriram/Downloads/Flask/csv/game_rows.csv"
-csv5_file_path="/Users/sriram/Downloads/Flask/csv/play_rows.csv"
-csv6_file_path="/Users/sriram/Downloads/Flask/csv/question_rows.csv"
-csv7_file_path="/Users/sriram/Downloads/Flask/csv/source_rows.csv"
-csv8_file_path="/Users/sriram/Downloads/Flask/csv/status_rows.csv"
+csv_file_path="/Users/sriram/Downloads/Flask/csv/question.csv"
+csv1_file_path="/Users/sriram/Downloads/Flask/csv/author.csv"
+csv2_file_path="/Users/sriram/Downloads/Flask/csv/game_category.csv"
+csv3_file_path="/Users/sriram/Downloads/Flask/csv/game_leader.csv" 
+csv4_file_path="/Users/sriram/Downloads/Flask/csv/game.csv"
+csv5_file_path="/Users/sriram/Downloads/Flask/csv/play.csv"
+csv6_file_path="/Users/sriram/Downloads/Flask/csv/question.csv"
+csv7_file_path="/Users/sriram/Downloads/Flask/csv/source.csv"
+csv8_file_path="/Users/sriram/Downloads/Flask/csv/status.csv"
 
 arr=[csv_file_path,csv1_file_path,csv2_file_path,csv3_file_path,csv4_file_path,csv5_file_path,csv6_file_path,csv7_file_path,csv8_file_path]
-arr1=["question_rows","author_rows","game_category_rows","game_leader_rows","game_rows","play_rows","question_rows","source_rows","status_rows"]
+arr1=["question","author","game_category","game_leader","game","play","question","source","status"]
 
 #reading into db
 
@@ -49,5 +49,5 @@ for i in range(len(arr)):
     except:
         print('Something went wrong!')
 
-print(engine.execute("Select question_content FROM question_rows").fetchall()[2][0])
+print(engine.execute("Select question_content FROM question").fetchall()[2][0])
 

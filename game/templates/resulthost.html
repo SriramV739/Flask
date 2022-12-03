@@ -3,8 +3,8 @@
 Results
 {%endblock%}
 {%block content%}
-{{engine.execute("Select question_content FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0]|safe}}
-
+{%set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
+<h5>{{engine.execute(qry).fetchall()[0][0]|safe}}</h5>
 <table class="table table-hover bg-info">
     <thead>
         <tr>
@@ -18,22 +18,25 @@ Results
     </thead>
     <tbody>
         <!-- Your rows inside the table HERE: -->
-        {%set choices=engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2]%}
-
-        {% for i in range(engine.execute("Select choices FROM question_rows").fetchall()[game.questions.split(',')[qnum]|int][0].split('\n')[1:-2] |length) %}
-        
+        {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
+        {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
+        {%set cc=namespace(curcat=0)%}
+  {%for c in range(choices|length)%}
+  {%if choices[c][2:4]=="li"%}
         <tr>
                 
-                <td>{%if i==corrans%}
+                <td>{%if cc.curcat==corrans%}
                     ->
                 {%endif%}</td>
 
-                <td>{{subnums[i]}}</td>
-                <td><p>{{choices[i][5:-5]|safe}}</p></td>
+                <td>{{subnums[cc.curcat]}}</td>
+                <td><p>{{choices[c][5:-5]|safe}}</p></td>
                     
 
 
         </tr>
+        {%set cc.curcat=cc.curcat+1%}
+        {%endif%}
         {% endfor %}
 
     </tbody>

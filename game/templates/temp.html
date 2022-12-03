@@ -63,7 +63,7 @@ html, * {
 <div class="row">
   <!-- <div class="color-bar col-sm-1"></div> -->
   <div id="question-content" class="col-sm-12" >
-    {{engine.execute("Select question_content FROM question_rows").fetchall()[qnum][0]|safe}}
+    {{engine.execute("Select question_content FROM question").fetchall()[qnum][0]|safe}}
   </div>
 </div>
 

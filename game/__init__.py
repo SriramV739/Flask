@@ -4,7 +4,7 @@ from flask_login import LoginManager, UserMixin
 from sqlalchemy import create_engine
 from flask_socketio import SocketIO,send
 #test change
-
+    
 import os
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///verifyit.db'
