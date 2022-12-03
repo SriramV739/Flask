@@ -1,9 +1,0 @@
-city,leader_handle,current_play,created_at,is_teacher,school,grade
-"Las Vegas, NV",Mr. Gagliardi,3473,2022-01-20 08:58:19-08,true,William Orr,8
-Alameda CA,Linda,3139,2022-03-29 10:56:53.443465-07,true,Hard Knocks,10
-"Las Vegas, NV",Teacher Ric,3155,2022-01-31 14:21:30.6684-08,true,William Orr,8
-"Alameda, CA",Teacher Bytof,3204,2022-04-21 11:25:38.910781-07,true,Hard Knocks,11
-,Linda B,3249,2022-04-28 11:46:01.600123-07,false,,
-"Alameda, CA",Teacher Linda,3404,2022-04-24 14:31:48.03577-07,true,Hard Knocks,11
-"Alameda, CA",Teacher LindaB,3405,2022-05-06 08:57:23.540757-07,true,Hard Knocks,11
-Alameda CA,Sheila,3788,2022-08-08 20:54:37.276418-07,true,Sda,12
