@@ -2,7 +2,7 @@ from game import db
 #from flask_login import UserMixin
 class Games(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
-    game=db.Column(db.Integer())
+    game=db.Column(db.String())
     questions=db.Column(db.String())
     code = db.Column(db.Integer(), nullable=False)
     time = db.Column(db.Integer())
