@@ -15,18 +15,19 @@ if __name__=="__main__":
 
 #from game.load import engine
 from game import app
-from flask import render_template, redirect,url_for, flash, request
+from flask import render_template, redirect,url_for, flash, request, session
 #from game.models import
 from game.forms import JoinForm,StartGameForm,SubmitAnswerForm
 from game import db,socketio
 from game.models import Games,Players
 from sqlalchemy import Column, Integer, Float, Date, String, VARCHAR, select, MetaData
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import sessionmaker
 from flask_login import login_user,logout_user, login_required, current_user
 import random
 from flask_socketio import SocketIO,send, emit
+import time
 def remove_html_tags(text):
     """Remove html tags from a string"""
     import re
@@ -126,12 +127,36 @@ def multiquestion_page(playerid,gameid,qnum):
             return redirect(rt)
     return render_template("question.html",engine=engine,qnum=int(qnum),form=form
     ,player=player,game=game)
+def delete_players_helper(pg):
+    try:
+
+        return Games.query.filter_by(id=pg).first().code
+    except:
+        return ""
 @app.route('/start',methods=["GET","POST"])
 def start_page():
+    
+    deleted_objects = Games.__table__.delete().where(Games.starttime<=time.time()-18000)
+    db.session.execute(deleted_objects)
+    db.session.commit()
     form=StartGameForm()
-    if form.submit.data:
+    if form.validate_on_submit():
 
         if request.form.get("game_choice"):
+            try:
+                print(session["handles"])
+            except:
+                session["handles"]=[]
+            session["handles"].append(form.code.data)
+            session.modified = True
+            print(session["handles"])
+            if Games.query.filter_by(code=form.code.data):
+                deleted_objects = Players.__table__.delete().where(delete_players_helper(Players.game)==form.code.data)
+                db.session.execute(deleted_objects)
+                db.session.commit()
+                deleted_objects = Games.__table__.delete().where(Games.code==form.code.data)
+                db.session.execute(deleted_objects)
+                db.session.commit()
             gamechoice = str(request.form.get("game_choice"))
             qry="Select * FROM game_category WHERE game='"+gamechoice+"'"
             gamerow=engine.execute(qry).fetchall()[0]
@@ -147,15 +172,20 @@ def start_page():
             print(qstr)
             print(gamerow)
             print(gamechoice)
-            code = random.randint(100000, 999999)
-            while Games.query.filter_by(code=str(code)).count() > 0:
-                code = random.randint(100000, 999999)
-            db.session.add(Games(game=gamechoice,code=code,time=0,questions=qstr))
+            code = form.code.data
+            
+            #     code = random.randint(100000, 999999)
+            db.session.add(Games(game=gamechoice,code=code,time=0,questions=qstr, starttime=time.time()))
             db.session.commit()
             nl="/waiting/host/"+str(Games.query.filter_by(code=code).first().id)
             return redirect(nl)
         else:
+    
             flash("Please choose a game.",category="danger")
+    if form.errors!={}:
+        # for err_msg in form.errors.values():
+        #     flash(f'{err_msg}', category='danger')
+        flash("This code is already in use. Please choose a different code.",category="danger")
     return render_template("start.html",engine=engine,form=form)
 @app.route("/waiting/host/<id>",methods=["GET","POST"])
 def waiting_host_page(id):
@@ -182,8 +212,11 @@ def player_result_page(playerid,gameid,qnum):
     oqry="Select choices FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     subnums=[0]*len(engine.execute(oqry).fetchall()[0][0].split("\n"))
     for player in Players.query.filter_by(game=gameid):
-        if player.submission.split(';')[qnum]!="":
-            subnums[int(player.submission.split(';')[qnum])]+=1
+        try:
+            if player.submission.split(';')[qnum]!="":
+                subnums[int(player.submission.split(';')[qnum])]+=1
+        except:
+            pass
 
     pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
     if pans!="":
@@ -221,8 +254,11 @@ def host_result_page(gameid,qnum):
     #print("s"+str(len(subnums)))
     #subnums=[0]*len(engine.execute("Select choices FROM question").fetchall()[int(game.questions.split(',')[qnum])][0].split('\n')[1:-2])
     for player in Players.query.filter_by(game=gameid):
-        if player.submission.split(';')[qnum]!="":
-            subnums[int(player.submission.split(';')[qnum])]+=1
+        try:
+            if player.submission.split(';')[qnum]!="":
+                subnums[int(player.submission.split(';')[qnum])]+=1
+        except:
+            pass
             #print(int(player.submission.split(';')[qnum]))
     return render_template("resulthost.html",game=game,qnum=int(qnum)
     ,corrans=corrans,subnums=subnums,engine=engine)

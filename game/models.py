@@ -4,9 +4,10 @@ class Games(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     game=db.Column(db.String())
     questions=db.Column(db.String())
-    code = db.Column(db.Integer(), nullable=False)
+    code = db.Column(db.String(), nullable=False)
     time = db.Column(db.Integer())
-    players=db.relationship('Players',backref='owned_game',lazy=True)
+    starttime=db.Column(db.Integer(),)
+    players=db.relationship('Players',backref='owned_game',lazy=True,cascade='all,delete')
 class Players(db.Model):
     id=db.Column(db.Integer(),primary_key=True)
     name=db.Column(db.String(length=15))

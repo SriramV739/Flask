@@ -5,6 +5,7 @@ Start a Game
 {%block content%}
 <div class="text-center"><h3>Start a Game</h3><br></div>
 <form method="POST">
+    {{form.hidden_tag()}}
 <div class="row" style="margin-top:20px; margin-left:20px;">
 <div class="col-8">
 
@@ -18,7 +19,10 @@ Start a Game
     {%endfor%}
 </div>
 <div class="col-4">
-{{form.submit(class="btn btn-lg btn-primary p-4")}}
+    <div class="d-flex justify-content-center">
+{{form.code(class="form-control text-center w-50",placeholder="Create a Join Code")}}<br></div>
+<div class="d-flex justify-content-center">
+{{form.submit(class="btn btn-lg btn-primary p-4")}}</div>
     <br></div></div></form>
 
 {%endblock%}
