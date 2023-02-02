@@ -34,7 +34,6 @@ socket.on('gotonextq',function(gameid){
 }})
     $('#startform').on('click',function() {
             socket.emit('gotonextq',{"gid":gid,"qon":"{{qnum}}"});
-            
         }
             )
         

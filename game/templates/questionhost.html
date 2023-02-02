@@ -15,7 +15,6 @@ Question
     {%set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
     <h5>{{engine.execute(qry).fetchall()[0][0]|safe}}</h5><form method="POST" id="qform">
       {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-
       {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
       {%for c in range(choices|length)%}
       {%if choices[c][2:4]=="li"%}
@@ -32,16 +31,35 @@ Question
   <div class="text-center" style="display: inline"><h3>&#9200;</h3><h3 id="timer"></h3></div>
   <button class="btn btn-lg btn-primary p-4" id="startform">Continue</button>
 </div>
+{%for p in range(pnames|length)%}
+    <p>{{pnames[p]}}</p>
+    {%endfor%}
 <script>
         var socket=io({'multiplex': false})
 
     var gid="{{game.id}}"
   var time=30;
+var count=0;
 var x = setInterval(function() {
 document.getElementById("timer").innerHTML = Math.round(time)
 $('#startform').on('click',function() {
     socket.emit('timeup',gid);})
-    
+
+  socket.on('oneanswer',function(data){
+  console.log("Hello");
+  if(gid==data){
+    console.log("{{numconnected}}");
+    console.log("Hello");
+    count++;
+    console.log(count);
+     if(count==parseInt("{{numconnected}}")){
+       socket.emit('timeup',gid)
+     }
+    //socket.emit('timeup',gid);
+  }
+})
+
+
 socket.on('timeup',function(data){
   if(gid==data){
   var locto="/resulthost/"+gid+"/"+"{{qnum}}";
@@ -59,12 +77,22 @@ if (time <= 0) {
   socket.emit('timeup',gid)
   clearInterval(x);
   document.getElementById("timer").innerHTML = "Time is up!";
-    
-    
-
 }
 }, 100);
 
+socket.on('oneanswer',function(data){
+  console.log("Hello");
+  if(gid==data){
+    console.log("{{numconnected}}");
+    console.log("Hello");
+    count++;
+    console.log(count);
+     if(count==parseInt("{{numconnected}}")){
+       socket.emit('timeup',gid)
+     }
+    //socket.emit('timeup',gid);
+  }
+})
 
 </script>
 

@@ -28,6 +28,11 @@ from flask_login import login_user,logout_user, login_required, current_user
 import random
 from flask_socketio import SocketIO,send, emit
 import time
+print("sdfsfkj")
+removed={}
+numconnected={}
+numanswered={}
+pnames={}
 def remove_html_tags(text):
     """Remove html tags from a string"""
     import re
@@ -48,6 +53,7 @@ conn=engine.connect()
 @app.route("/")
 @app.route("/home")
 def index():
+    print("Hello Index")
     return render_template("index.html")
 @app.route("/players")
 def player():
@@ -70,13 +76,21 @@ def join_page():
     return render_template("join.html",form=form)
 @app.route("/waiting/<playerid>/<gameid>")
 def waiting_page(playerid,gameid):
+    global pnames
+    global numconnected
+    if gameid not in numconnected:
+        numconnected[gameid]=1
+    else:
+        numconnected[gameid]+=1
     return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first()
-    ,player=Players.query.filter_by(id=playerid).first())
+    ,player=Players.query.filter_by(id=playerid).first(),pnames=pnames[gameid])
 @app.route("/questionhost/<gameid>/<qnum>",methods=["GET","POST"])
 def question_host_page(gameid,qnum):
+    global numanswered
+    global pnames
     game=Games.query.filter_by(id=gameid).first()
     return render_template("questionhost.html",engine=engine,qnum=int(qnum),
-    game=game)
+    game=game,numconnected=numconnected[gameid],pnames=pnames[gameid],numanswered=numanswered[gameid])
 
 @app.route("/singlequestion/<qnum>",methods=["GET","POST"])
 def question_page(qnum):
@@ -127,19 +141,30 @@ def multiquestion_page(playerid,gameid,qnum):
             return redirect(rt)
     return render_template("question.html",engine=engine,qnum=int(qnum),form=form
     ,player=player,game=game)
+
 def delete_players_helper(pg):
     try:
 
         return Games.query.filter_by(id=pg).first().code
     except:
         return ""
+def delete_players_helper1(pg):
+    try:
+
+        return Games.query.filter_by(id=pg).first().starttime
+    except:
+        return 100000000000
+
+
 @app.route('/start',methods=["GET","POST"])
 def start_page():
-    
-    deleted_objects = Games.__table__.delete().where(Games.starttime<=time.time()-18000)
+    form=StartGameForm()
+    deleted_objects = Players.__table__.delete().where(float(delete_players_helper1(Players.game))<=time.time()-3600)
     db.session.execute(deleted_objects)
     db.session.commit()
-    form=StartGameForm()
+    deleted_objects = Games.__table__.delete().where(Games.starttime<=time.time()-3600)
+    db.session.execute(deleted_objects)
+    db.session.commit()
     if form.validate_on_submit():
 
         if request.form.get("game_choice"):
@@ -188,24 +213,39 @@ def start_page():
         flash("This code is already in use. Please choose a different code.",category="danger")
     return render_template("start.html",engine=engine,form=form)
 @app.route("/waiting/host/<id>",methods=["GET","POST"])
+
 def waiting_host_page(id):
+    global numconnected
+    numconnected[id]=0
+    global numanswered
+    numanswered[id]=0
     form=StartGameForm()
     players=Players.query.filter_by(game=id)
-    pnames=[]
+    global pnames
+    pnames[id]=[]
     for p in players:
-        pnames.append(p.name)
+        pnames[id].append(p.name)
+    global removed
+    if id in removed:
+        for i in removed[id]:
+            if i in pnames[id]:
+                pnames[id].remove(i)
+    pnames[id]=list(set(pnames[id]))
+    print(pnames,id,flush=True)
     if form.submit.data:
         print("a")
-    return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first(),form=form,pnames=pnames)
-
+    return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first(),form=form,pnames=pnames[id])
 @app.route("/submittedanswer/<playerid>/<gameid>/<qnum>")
 def submitted_answer_page(playerid,gameid,qnum):
+    global numanswered
+    numanswered[gameid]+=1
     game=Games.query.filter_by(id=gameid).first()
-    return render_template("submittedanswer.html",game=game,qnum=int(qnum),playerid=playerid)
+    return render_template("submittedanswer.html",game=game,qnum=int(qnum),playerid=playerid,numconnected=numconnected[gameid],numanswered=numanswered[gameid])
 
 @app.route("/resultplayer/<playerid>/<gameid>/<qnum>")
 def player_result_page(playerid,gameid,qnum):
     qnum=int(qnum)
+    print("specific result")
     game=Games.query.filter_by(id=gameid).first()
     oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     corrans=engine.execute(oqry).fetchall()[0][0]-1
@@ -216,6 +256,26 @@ def player_result_page(playerid,gameid,qnum):
             if player.submission.split(';')[qnum]!="":
                 subnums[int(player.submission.split(';')[qnum])]+=1
         except:
+            global numconnected
+            global removed
+            print("playerleft",flush=True)
+            print(type(gameid))
+            print(type(player.name))
+            print(numconnected[gameid])
+            global pnames
+            #Players.query.filter_by(id=Players.id).delete()
+            #db.session.commit()
+            if player.name in pnames[gameid]:
+                pnames[gameid].remove(player.name)
+                numconnected[gameid]-=1
+                if gameid not in removed:
+                    removed[gameid]=[player.name]
+                    #numconnected[gameid]-=1
+                else:
+                    #if player.name not in removed[gameid]:
+                        #numconnected[gameid]-=1
+                    removed[gameid].append(player.name)
+                    removed[gameid]=list(set(removed[gameid]))
             pass
 
     pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
@@ -232,6 +292,8 @@ def leaderboard_player_page(playerid,gameid,qnum):
 
 @app.route("/leaderboardh/<gameid>/<qnum>")
 def leaderboard_host_page(gameid,qnum):
+    global numanswered
+    numanswered[gameid]=0
     ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
     return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum))
 
@@ -244,6 +306,8 @@ def followup_player_page(playerid,gameid,qnum):
 
 @app.route("/resulthost/<gameid>/<qnum>")
 def host_result_page(gameid,qnum):
+    global numanswered
+    numanswered[id]=0
     qnum=int(qnum)
     game=Games.query.filter_by(id=gameid).first()
     oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
@@ -257,7 +321,30 @@ def host_result_page(gameid,qnum):
         try:
             if player.submission.split(';')[qnum]!="":
                 subnums[int(player.submission.split(';')[qnum])]+=1
+                print("before",flush=True)
+                print(player.submission.split(';')[qnum],flush=True)
+                print("after",flush=True)
         except:
+            global numconnected
+            global removed
+            print("playerleft1",flush=True)
+            print(type(gameid))
+            print(type(player.name))
+            print(numconnected[gameid])
+            global pnames
+            #Players.query.filter_by(id=Players.id).delete()
+            #db.session.commit()
+            if player.name in pnames[gameid]:
+                pnames[gameid].remove(player.name)
+                numconnected[gameid]-=1
+                if gameid not in removed:
+                    removed[gameid]=[player.name]
+                    #numconnected[gameid]-=1
+                else:
+                    # if player.name not in removed[gameid]:
+                    #     numconnected[gameid]-=1
+                    removed[gameid].append(player.name)
+                    removed[gameid]=list(set(removed[gameid]))
             pass
             #print(int(player.submission.split(';')[qnum]))
     return render_template("resulthost.html",game=game,qnum=int(qnum)
@@ -291,12 +378,23 @@ def newc(gid):
     #print(gid)
     #print(request.path.split('/')[2])
     players=Players.query.filter_by(game=gid)
-    pnames=[]
+    global pnames
+    pnames[gid]=[]
     for p in players:
-        pnames.append(p.name)
-    print(pnames)
-    emit('addnewc',{"players": pnames,"gameid":gid},broadcast=True)
-
+        pnames[gid].append(p.name)
+    pnames[gid]=list(set(pnames[gid]))
+    global removed
+    if gid in removed:
+        for i in removed[gid]:
+            if i in pnames[gid]:
+                pnames[gid].remove(i)
+    #numconnected=max(numconnected,len(pnames))
+    print(pnames[gid])
+    emit('addnewc',{"players": pnames[gid],"gameid":gid},broadcast=True)
+@socketio.on('oneanswer')
+def oneanswer(gid):
+    print("LKJSLKDJFLKSDJFKLSDJFLKSD")
+    emit('oneanswer',gid,brodcast=True)
 @socketio.on('gamehasstarted')
 def gamehasstarted(gid):
     print('ghs')
@@ -309,7 +407,6 @@ def timeleft(data):
 
 @socketio.on('timeup')
 def timeup(gid):
-    
     emit('timeup',gid,broadcast=True)
 
 @socketio.on('gotofollowup')
@@ -317,11 +414,11 @@ def gotofollowup(gid):
     emit('gotofollowup',gid,broadcast=True)
 
 @socketio.on('gotolb')
-def gotofollowup(gid):
+def gotolb(gid):
     emit('gotolb',gid,broadcast=True)
 
 @socketio.on('gotonextq')
-def gotofollowup(data):
+def gotonextq(data):
     game=Games.query.filter_by(id=data["gid"]).first()
     print(data["qon"],len(game.questions.split(','))-2)
     if int(data["qon"])==len(game.questions.split(','))-2:

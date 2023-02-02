@@ -12,9 +12,9 @@ Waiting for Game to Start
 
 <button class="btn btn-lg btn-primary p-4" id="startform">Start</button>
 <div class="container" id="plist">
-      {%for p in pnames%}
+      {%for p in range(pnames|length)%}
       <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>
-            {{p}}</div></div>
+            {{pnames[p]}}</div></div>
             {%endfor%}
 </div>
 
@@ -23,7 +23,7 @@ Waiting for Game to Start
 <!-- <button id="sendbutton">Send</button> -->
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script> 
 <script type="text/javascript">
-      
+      console.log("sdfsfs")
       var gid="{{game.id}}"
       // console.log("http://"+document.domain+":"+location.port+"/waiting/host/{{game.id}}");
       //var socket =io.connect("http://"+document.domain+location.port+"/waiting/host/game.id (ADD braces)");

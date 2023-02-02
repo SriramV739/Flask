@@ -5,8 +5,23 @@ Waiting for Other Players
 {%block content%}
 <h2>Waiting for other players to finish.</h2>
 <script>
+  var count=0;
     var gid="{{game.id}}"
   var socket=io({'multiplex': false})
+  socket.emit('oneanswer',gid)
+  console.log("emittedsignal")
+  socket.on('oneanswer',function(data){
+  if(gid==data){
+    console.log("{{numconnected}}");
+    console.log("{{numanswered}}");
+    count++;
+    console.log(count);
+     if(parseInt("{{numanswered}}")==parseInt("{{numconnected}}")){
+       socket.emit('timeup',gid);
+     }
+    //socket.emit('timeup',gid);
+  }
+})
   socket.on('timeup',function(data){
     var locto="{{'/resultplayer/'~playerid~'/'~game.id~'/'~(qnum)}}"
     console.log(locto)

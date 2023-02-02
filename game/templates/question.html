@@ -38,9 +38,15 @@ Question
 <script>
   function processButton(id){
     document.getElementById("qform").val(id);
+    socket.emit('oneanswer',gid)
     document.getElementById("qform").submit();
   }
   var gid="{{game.id}}"
+  // $('#startform').on('click',function() {
+  //     socket.emit('oneanswer',gid)
+  //     var locto="/questionhost/"+gid+"/0";
+  //     window.location.href=locto;
+  //   })
   var socket=io({'multiplex': false})
 
   var time=30;
@@ -59,6 +65,7 @@ socket.on('timeup',function(gameid){
     //window.location.href=locto
   }
   })
+
 var x = setInterval(function() {
 document.getElementById("timer").innerHTML = Math.round(time)
 

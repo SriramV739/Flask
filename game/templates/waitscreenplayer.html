@@ -32,7 +32,6 @@ console.log(data.players)
     }}})
     socket.on('gamehasstarted',function(gameid){
         if (gid==gameid){
-            
             window.location.href="/question/{{player.id}}/{{game.id}}/0"
         }
     })
