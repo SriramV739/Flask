@@ -4,7 +4,98 @@ Question
 {%endblock%}
 
 {%block content%}<br>
+<style>
+  .popup {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+padding: 20px;
+background-color: white;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+z-index: 9999;
+display: none;
+}
+
+.popup-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 9998;
+background-color: rgba(0, 0, 0, 0.5);
+display: none;
+}
+.popup-close {
+position: absolute;
+top: 5px;
+right: 10px;
+font-size: 1.2em;
+padding: 0.2em 0.5em;
+background-color: transparent;
+border: none;
+cursor: pointer;
+color: #333;
+}
+
+.popup-close:hover {
+color: #0a0a0a;
+}
+</style>
 <div class="container">
+  <div class="row mt-4 ms-4">
+    <div class="col-10">
+      <div class="text-end"><h5></h5></div>
+      <div>
+        <div class="progress">
+          <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
+        </div>
+        <br><br>  
+        <!-- {set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"} -->
+        <h3 class="mb-4" style="font-size: 1.3rem !important;">{{q|safe}}</h3>
+        <form method="POST" id="qform">
+          {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
+          {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
+          {%for c in range(choices|length)%}
+            {%if choices[c][2:4]=="li"%}
+              <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{choices[c][5:-5]|safe}}</h5>
+            {%endif%}
+          {%endfor%}
+          <input id="timeleft" name="timeleft" type="hidden">
+        </form>
+      </div>
+    </div>
+    <div class="col-2">
+      <div class="my-4">
+        <div class="text-center"><h3>&#9200;</h3><h3 id="timer"></h3></div>
+        <button class="btn btn-lg btn-primary px-4 py-2 mt-3" id="startform">Continue</button>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header">
+          <h5 class="card-title">Players</h5>
+        </div>
+        <div class="card-body">
+          {% for p in range(pnames|length) %}
+          <div class="card my-2" style="background-color:#0074D9; color: #FFFFFF;">
+          <!-- <div class="card my-2" style="background-color: {% if p % 3 == 0 %} #FF4136 {% elif p % 3 == 1 %} #FFFFFF {% else %} #0074D9 {% endif %}; color: {% if p % 3 == 0 %} #FFFFFF {% elif p % 3 == 1 %} #333333 {% else %} #FFFFFF {% endif %};"> -->
+            <div class="card-body">
+              <p class="mb-0">{{ pnames[p] }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    
+    
+    
+
+    </div>
+  </div>
+</div>
+
+<!--{%raw%} <div class="container">
   <div class="row" style="margin-top:20px; margin-left:20px;">
     <div class="col-10">
     <div class="text-right" style="display: inline"><h5></h5></div><div>
@@ -33,8 +124,90 @@ Question
 </div>
 {%for p in range(pnames|length)%}
     <p>{{pnames[p]}}</p>
-    {%endfor%}
+    {%endfor%} {%endraw%}-->
 <script>
+  document.querySelectorAll('span[style="color:#000000"]').forEach( node => {
+          node.replaceWith(...node.childNodes)
+        })
+  
+document.querySelectorAll('em > strong, strong > em').forEach(element => {
+  
+  const iElement = document.createElement('i');
+  iElement.classList.add('fas', 'fa-info-circle');
+  iElement.style.marginLeft = '5px';
+  element.appendChild(iElement);
+  element.appendChild(iElement);
+  element.style.textDecoration = 'underline dotted';
+  element.style.cursor = 'pointer';
+
+  // create popup element
+  console.log(element.nodeType);
+  const strElement = element.parentNode;
+  console.dir(strElement)
+  //const spanElement = strElement.parentNode;
+  
+  const nextspan = strElement.nextElementSibling;
+  console.dir(nextspan);
+  content=nextspan.innerHTML
+  console.log(content)
+  const startIndex = content.indexOf('<!--') + 4;
+const endIndex = content.lastIndexOf('-->');
+
+// Extract the text between `<!--` and `-->`
+const extractedText = content.substring(startIndex, endIndex).trim();
+
+console.log(extractedText);
+  //console.log(enode.nodeType);
+  // if (commentNode && commentNode.nodeType === Node.COMMENT_NODE && commentNode.nodeValue) {
+  //const content = enode.outerHTML;
+  //console.log(content);
+
+  //console.log('No comment node found');
+ // const textContent = nextElement.innerHTML;
+  //console.log(textContent)
+  //if (textNode !== null) {
+    //console.log(textNode.textContent.trim());
+ // }
+  
+  const popup = document.createElement('div');
+  popup.classList.add('popup');
+  //THESE RUN
+  // const tc=element.textContent
+  // const qry="Select description FROM source WHERE name='"+element.textContent+"'"
+  // {set content=engine.execute(qry).fetchall()[0][0]}
+  popup.innerHTML = extractedText;
+
+  // create close button
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'X';
+  closeButton.classList.add('popup-close');
+
+  // add close button to popup
+  popup.appendChild(closeButton);
+
+  // create overlay element
+  const overlay = document.createElement('div');
+  overlay.classList.add('popup-overlay');
+
+  // add popup and overlay elements to the DOM
+  document.body.appendChild(popup);
+  document.body.appendChild(overlay);
+
+  // add click event listener to hide popup and overlay
+  overlay.addEventListener('click', hidePopup);
+  closeButton.addEventListener('click', hidePopup);
+
+  // function to hide popup and overlay
+  function hidePopup() {
+    popup.style.display = 'none';
+    overlay.style.display = 'none';
+  }
+
+  // add click event listener to show popup and overlay
+  element.addEventListener('click', () => {
+    popup.style.display = 'block';
+    overlay.style.display = 'block';
+  })})
         var socket=io({'multiplex': false})
 
     var gid="{{game.id}}"
@@ -95,7 +268,50 @@ socket.on('oneanswer',function(data){
 })
 
 </script>
+<style>
+  body {
+  background-color: #89C4FF;
+  color: black;
+}
 
+.container {
+  margin-top: 20px;
+  margin-left: 20px;
+}
+
+.col-10 {
+  display: inline;
+}
+
+.text-right {
+  display: inline;
+}
+
+.progress {
+  margin-top: 20px;
+}
+
+.progress-bar {
+  background-color: #007bff;
+}
+
+.col-2 {
+  margin-top: 50px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+input[type="radio"] {
+  margin-top: 10px;
+}
+
+p {
+  font-size: 16px;
+}
+</style>
 {%endblock%}
 {%block style%}
       body {

@@ -1,4 +1,144 @@
-{%extends 'base.html'%}
+{% extends 'base.html' %}
+{% block title %}
+Start a Game
+{% endblock %}
+{% block content %}
+<div class="text-center" style="padding: 20px">
+    <h3 style="color: white; font-weight: bold;">Start a Game</h3>
+  </div>
+<form method="POST">
+    {{form.hidden_tag()}}
+    <div class="row" style="margin-top:20px; margin-left:20px;">
+        <div class="col-8">
+            {% set cc = namespace(curcat="0") %}
+            <table class="table table-hover table-bordered">
+                <tbody>
+                    {% for i in engine.execute("Select * FROM game_category ORDER BY class").fetchall() %}
+                        {% if cc.curcat != i[6] %}
+                        <tr class="clickable" data-toggle="collapse" data-target=".{{i[6]}}" aria-expanded="false"  style="background-color: lightblue;">
+
+                                <td colspan="3"><strong>{{i[6]}}</strong> <span class="float-right fas fa-chevron-down"></span></td>
+                            
+
+                            </tr>
+                            <tr class="collapse {{i[6]}}">
+                                <th></th>
+                                <th>Name</th>
+                                <th># of Questions</th>
+                            </tr>
+                            {% set cc.curcat = i[6] %}
+                        {% endif %}
+                        <tr class="collapse {{i[6]}}">
+                            <td><input type="radio" name="game_choice" value="{{i[0]}}"></td>
+                            <td>{{i[0]}}</td>
+                            <td style="width: 10%">{{i[2]}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="col-4">
+            <div class="d-flex justify-content-center">
+                {{form.code(class="form-control text-center w-50", placeholder="Create a Join Code")}}<br>
+            </div>
+            <div class="d-flex justify-content-center">
+                {{form.submit(class="btn btn-lg btn-primary p-4")}}
+            </div>
+            <br>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block style %}
+    table {
+        background-color: #f9f9f9;
+    }
+    th {
+        font-weight: bold;
+    }
+    td {
+        vertical-align: middle;
+    }
+    .clickable {
+        cursor: pointer;
+    }
+    .collapse.show {
+        display: table-row;
+    }
+    .collapse {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+
+<!-- {%raw%}
+{% extends 'base.html' %}
+
+{% block title %}
+Start a Game
+{% endblock %}
+
+{% block content %}
+<div class="text-center">
+  <h3>Start a Game</h3>
+  <br>
+</div>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <div class="row" style="margin-top: 20px; margin-left: 20px;">
+    <div class="col-8">
+      {% set cc = namespace(curcat="") %}
+      <table class="table table-hover table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th># of Questions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for i in engine.execute("Select * FROM game_category ORDER BY class").fetchall() %}
+          {% if cc.curcat != i[6] %}
+          <tr class="table-primary">
+            <td colspan="2" class="cursor-pointer" data-toggle="collapse" data-target="#{{i[6]}}">{{ i[6] }}</td>
+          </tr>
+          {% set cc.curcat = i[6] %}
+          {% endif %}
+          <tr class="collapse table-light" id="{{ i[6] }}">
+            <td>{{ i[0] }}</td>
+            <td>{{ i[2] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col-4">
+      <div class="d-flex justify-content-center">
+        {{ form.code(class="form-control text-center w-50", placeholder="Create a Join Code") }}
+        <br>
+      </div>
+      <div class="d-flex justify-content-center">
+        {{ form.submit(class="btn btn-lg btn-primary p-4") }}
+      </div>
+      <br>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block style %}
+input {
+  font-size: 70px;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+{% endblock %} {%raw%}-->
+
+
+<!-- {%raw%}{%extends 'base.html'%}
 {%block title%}
 Start a Game
 {%endblock%}
@@ -30,4 +170,4 @@ Start a Game
 input{
 font-size:70px
 }
-{%endblock%}
+{%endblock%}{%endraw%} -->

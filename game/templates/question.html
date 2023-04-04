@@ -4,6 +4,45 @@ Question
 {%endblock%}
 
 {%block content%}<br>
+<style>
+  .popup {
+position: fixed;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+padding: 20px;
+background-color: white;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+z-index: 9999;
+display: none;
+}
+
+.popup-overlay {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: 9998;
+background-color: rgba(0, 0, 0, 0.5);
+display: none;
+}
+.popup-close {
+position: absolute;
+top: 5px;
+right: 10px;
+font-size: 1.2em;
+padding: 0.2em 0.5em;
+background-color: transparent;
+border: none;
+cursor: pointer;
+color: #333;
+}
+
+.popup-close:hover {
+color: #0a0a0a;
+}
+</style>
 <div class="container">
   <div class="row" style="margin-top:20px; margin-left:20px;">
     <div class="col-10">
@@ -13,8 +52,8 @@ Question
   <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
 </div>
     <br><br>  
-    {%set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-<h5>{{engine.execute(qry).fetchall()[0][0]|safe}}</h5>
+    <!-- {set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"} -->
+    <h3 class="mb-4" style="font-size: 1.3rem;">{{q|safe}}</h3>
 <form method="POST" id="qform">
   {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
   {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
@@ -36,6 +75,90 @@ Question
   <div class="text-center" style="display: inline"><h3>&#9200;</h3><h3 id="timer"></h3></div>
 </div>
 <script>
+    document.querySelectorAll('span[style="color:#000000"]').forEach( node => {
+          node.replaceWith(...node.childNodes)
+        })
+  
+document.querySelectorAll('em > strong, strong > em').forEach(element => {
+  
+  const iElement = document.createElement('i');
+  iElement.classList.add('fas', 'fa-info-circle');
+  iElement.style.marginLeft = '5px';
+  element.appendChild(iElement);
+  element.appendChild(iElement);
+  element.style.textDecoration = 'underline dotted';
+  element.style.cursor = 'pointer';
+
+  // create popup element
+  console.log(element.nodeType);
+  const strElement = element.parentNode;
+  console.dir(strElement)
+  //const spanElement = strElement.parentNode;
+  
+  const nextspan = strElement.nextElementSibling;
+  console.dir(nextspan);
+  content=nextspan.innerHTML
+  console.log(content)
+  const startIndex = content.indexOf('<!--') + 4;
+const endIndex = content.lastIndexOf('-->');
+
+// Extract the text between `<!--` and `-->`
+const extractedText = content.substring(startIndex, endIndex).trim();
+
+console.log(extractedText);
+  //console.log(enode.nodeType);
+  // if (commentNode && commentNode.nodeType === Node.COMMENT_NODE && commentNode.nodeValue) {
+  //const content = enode.outerHTML;
+  //console.log(content);
+
+  //console.log('No comment node found');
+ // const textContent = nextElement.innerHTML;
+  //console.log(textContent)
+  //if (textNode !== null) {
+    //console.log(textNode.textContent.trim());
+ // }
+  
+  const popup = document.createElement('div');
+  popup.classList.add('popup');
+  //THESE RUN
+  // const tc=element.textContent
+  // const qry="Select description FROM source WHERE name='"+element.textContent+"'"
+  // {set content=engine.execute(qry).fetchall()[0][0]}
+  popup.innerHTML = extractedText;
+
+  // create close button
+  const closeButton = document.createElement('button');
+  closeButton.textContent = 'X';
+  closeButton.classList.add('popup-close');
+
+  // add close button to popup
+  popup.appendChild(closeButton);
+
+  // create overlay element
+  const overlay = document.createElement('div');
+  overlay.classList.add('popup-overlay');
+
+  // add popup and overlay elements to the DOM
+  document.body.appendChild(popup);
+  document.body.appendChild(overlay);
+
+  // add click event listener to hide popup and overlay
+  overlay.addEventListener('click', hidePopup);
+  closeButton.addEventListener('click', hidePopup);
+
+  // function to hide popup and overlay
+  function hidePopup() {
+    popup.style.display = 'none';
+    overlay.style.display = 'none';
+  }
+
+  // add click event listener to show popup and overlay
+  element.addEventListener('click', () => {
+    popup.style.display = 'block';
+    overlay.style.display = 'block';
+  })
+  ;})
+
   function processButton(id){
     document.getElementById("qform").val(id);
     socket.emit('oneanswer',gid)
@@ -80,6 +203,7 @@ $("#timeleft").val(Math.round(time*100)/100)
 
 // }
 }, 100);
+
   
 
 </script>

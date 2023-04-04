@@ -4,7 +4,7 @@ from wtforms.validators import Length, EqualTo, Email, DataRequired, ValidationE
 from game.models import Games
 from flask import session
 class JoinForm(FlaskForm):
-    name=StringField(label="Name")
+    name=StringField(label="Name",validators=[Length(min=1,max=15)])
     code=StringField(label="Code")
     submit=SubmitField(label='Join')
 class StartGameForm(FlaskForm):

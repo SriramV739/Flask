@@ -1,8 +1,116 @@
-{%extends 'base.html'%}
+{% extends 'base.html' %}
+
+{% block title %}
+Waiting for Game to Start
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <h1 class="text-center mb-4">Waiting for the host to start game.</h1>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6 col-md-8">
+      <div class="card bg-danger text-white mb-4">
+        <div class="card-header">
+          Players
+        </div>
+        <div class="card-body" id="plist">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var gid = "{{ game.id }}";
+    var socket = io({'multiplex': false});
+
+    window.onload = function() {
+      console.log(gid);
+
+      // socket.on('connection',function() {
+      socket.emit('newc', gid);
+      // }
+      socket.on('disconnect', function() {
+        console.log('disconnected...')
+      });
+      socket.on('addnewc', function(data) {
+        if (gid == data.gameid) {
+          console.log(data.players);
+          //var pls=JSON.parse(players)
+          $("#plist").text('')
+          for (p in data.players) {
+
+            $("#plist").append(" <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>" +
+              data.players[p] + "</div></div>")
+          }
+        }
+      })
+      socket.on('gamehasstarted', function(gameid) {
+        if (gid == gameid) {
+          window.location.href = "/question/{{player.id}}/{{game.id}}/0"
+        }
+      })
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #e6e6e6;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .card {
+      border-radius: 10px;
+      border: none;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+      background-color: #dc3545;
+      border-radius: 10px 10px 0 0;
+      padding: 10px;
+    }
+
+    .card-header h2 {
+      font-size: 24px;
+      margin: 0;
+    }
+
+    .card-body {
+      background-color: #ff6b6b;
+      border-radius: 0 0 10px 10px;
+      padding: 10px;
+    }
+
+    .card-body .card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: none;
+      margin-bottom: 10px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .card-body .card p {
+      margin: 0;
+      font-size: 18px;
+      font-weight: bold;
+      color: #333;
+    }
+  </style>
+</div>
+
+{% endblock %}
+
+<!-- {% raw %}
+ {%extends 'base.html'%}
 {%block title%}
 Waiting for Game to Start
 {%endblock%}
 {%block content%}
+
 Waiting for the host to start game.
 <div class="container" id="plist">
     
@@ -37,4 +145,4 @@ console.log(data.players)
     })
 </script>
 </div>
-{%endblock%}
+{%endblock%}{% endraw %} -->

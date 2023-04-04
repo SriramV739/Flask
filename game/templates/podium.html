@@ -1,10 +1,54 @@
 {%extends 'base.html'%}
 {%block title%}
-Leaderboard
+Podium
 {%endblock%}
 {%block content%}
-<h3>The game has finished!</h3>
-<div class="container" id="plist">
+<div style="padding: 20px; text-align:center;">
+    <h3>The game has finished!</h3>
+  </div>
+<div class="row" style="margin-top:20px; margin-left:20px;">
+        <div class="container" id="plist">
+            <div class="row justify-content-center mt-5">
+              <div class="col-md-8">
+                <div class="card">
+                  <div class="card-header bg-danger text-white">
+                    <h4>Leaderboard</h4>
+                  </div>
+                  <div class="card-body text-black">
+                    {% set ns = namespace(rank=0) %}
+                    {% for player in ps %}
+                    {% set ns.rank = ns.rank + 1 %}
+                    <div class="row mb-2">
+                      <div class="col-1 align-self-center card-text text-black">
+                        {% if ns.rank == 1 %}
+                        &#x1F947;
+                        {% elif ns.rank == 2 %}
+                        &#x1F948;
+                        {% elif ns.rank == 3 %}
+                        &#x1F949;
+                        {% else %}
+                        <p class="card-text text-black">{{ ns.rank }}</p>
+                        {% endif %}
+                      </div>
+                      <div class="col-7 align-self-center text-black">
+                        <h5 class="card-title text-black">{{ player.name }}</h5>
+                      </div>
+                      <div class="col-4 text-right align-self-center text-black">
+                        <p class="card-text text-black">{{ player.score }}</p>
+                      </div>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <style>
+            .card-title, .card-text, .col-1{
+              color: black;
+            }
+          </style>
+<!--{%raw%} <div class="container" id="plist">
     {%for i in range(ps.count())%}
     <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>
         <div class="row" style="margin-top:20px; margin-left:20px;">
@@ -21,5 +65,5 @@ Leaderboard
         <div class="col-4">{{ps[i].score}}</div></div>
           </div></div>
           {%endfor%}
-</div>
+</div> {%endraw%}-->
 {%endblock%}
