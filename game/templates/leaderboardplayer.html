@@ -53,22 +53,25 @@ Leaderboard
         <div class="col-8">{{player.name}}</div>
         <div class="col-4">{{player.score}}</div></div>
           </div></div>
-          {%endfor%}
+          {%endfor%}`
 </div> {%endraw%}-->
+
 <script>
-    var socket=io({'multiplex': false})
+var socket=io({'multiplex': false})
+
+
 
 var gid="{{gameid}}"
-socket.on('gotonextq',function(gameid){
-    if (gid==gameid){  
-          var locto="/question/{{playerid}}/"+gid+"/"+"{{qnum|int+1}}";
-          window.location.href=locto;
-    }
-})
-socket.on('gotofinal',function(gameid){
-    if (gid==gameid){
-        var locto="/podium/"+gid
-        window.location.href=locto;
-    }})
+
+
+
 </script>
+
+<script type="text/javascript">
+	{% include "listen.js" %}
+</script>
+
+
+
+
 {%endblock%}
