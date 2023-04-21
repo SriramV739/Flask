@@ -75,7 +75,9 @@ socket.on('gotonextq',function(gameid){
     window.location.href=locto;
 }})
     $('#startform').on('click',function() {
-            socket.emit('gotonextq',{"gid":gid,"qon":"{{qnum}}"});
+            socket.emit('gotonextq',{q:"{{qnum}}",gid:gid});
+            var locto="/questionhost/"+gid+"/"+"{{qnum|int+1}}";
+            window.location.href=locto;    
         }
             )
         
