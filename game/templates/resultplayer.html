@@ -93,22 +93,12 @@ Results
     var socket=io({'multiplex': false});
 
     var gid="{{game.id}}";
-    socket.on('gotofollowup', function(gameid){
-        if (gid==gameid){
-            var locto="/playerfollowup/{{player.id}}/"+gid+"/"+"{{qnum}}";
-            window.location.href=locto;
-        }
-    });
+    
     var socket=io({'multiplex': false})
 
     var gid="{{game.id}}"
-    $('#startform').on('click',function() {
-            socket.emit('gotofollowup',gid);
-            var locto="/hostfollowup/"+gid+"/"+"{{qnum}}";
-            window.location.href=locto;})
-            document.querySelectorAll('span[style="color:#000000"]').forEach( node => {
-          node.replaceWith(...node.childNodes)
-        })
+
+
   
 document.querySelectorAll('em > strong, strong > em').forEach(element => {
   
@@ -188,7 +178,16 @@ console.log(extractedText);
     popup.style.display = 'block';
     overlay.style.display = 'block';
   })})
+  var gid="{{game.id}}"
+
+
 </script>
+
+<script type="text/javascript">
+    {% include "listen.js" %}
+  </script>
+  
+  
 {% endblock %}
 
 {% block style %}
@@ -236,80 +235,3 @@ td:first-child {
 {% endblock %}
 
 
-<!-- {%raw%}{%extends 'base.html'%}
-{%block title%}
-Results
-{%endblock%}
-{%block content%}
-{%set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-<h5>{{engine.execute(qry).fetchall()[0][0]|safe}}</h5>{%if corrans==pans%}
-{%set sty="bg-success"%}
-{%else%}
-{%set sty="bg-danger"%}
-{%endif%}
-<table class="table table-hover {{sty}}">
-    <thead>
-        <tr>
-           
-            <th scope="col">Your Answer</th>
-            <th scope="col">Correct Answer</th>
-            <th scope="col"># of Players</th>
-
-            <th scope="col">Answer Choice</th>
-
-        </tr>
-    </thead>
-    <tbody>
-        {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-        {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
-        {%set cc=namespace(curcat=0)%}
-  {%for c in range(choices|length)%}
-  {%if choices[c][2:4]=="li"%}
-  
-        <tr>
-                <td>{%if cc.curcat==pans%}
-                        ->
-                    {%endif%}
-                </td>
-                <td>{%if cc.curcat==corrans%}
-                    ->
-                {%endif%}</td>
-
-                <td>{{subnums[cc.curcat]}}</td>
-                <td><p>{{choices[c][5:-5]|safe}}</p></td>
-                    
-
-
-        </tr>
-        {%set cc.curcat=cc.curcat+1%}
-        {%endif%}
-        {% endfor %}
-
-    </tbody>
-</table>
-<script>
-    var socket=io({'multiplex': false})
-
-var gid="{{game.id}}"
-socket.on('gotofollowup',function(gameid){
-    if (gid==gameid){  
-          var locto="/playerfollowup/{{player.id}}/"+gid+"/"+"{{qnum}}";
-          window.location.href=locto;
-    }
-})
-</script>
-{%endblock%}
-{%block style%}
-{%if corrans==pans%}
-      body {
-      background-color: #169137;
-      color: black
-      }
-{%else%}
-body {
-    background-color: #a34129;
-    color: black
-    }
-{%endif%}
-{%endblock%}{%endraw%}
- -->
