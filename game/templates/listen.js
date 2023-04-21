@@ -22,6 +22,12 @@ socket.on('gotolb',function(data){
     }
 });
 
+socket.on('gotofinal',function(data){
+    if (gid==data.gid){
+        var locto="/podium/"+data.gid
+        window.location.href=locto;
+    }});
+
 socket.on('gotonextq',function(data){
     if(gid==data.gid){
         var qn=Number(data.q)+1
@@ -29,3 +35,4 @@ socket.on('gotonextq',function(data){
         window.location.href=locto;
     }
 });
+
