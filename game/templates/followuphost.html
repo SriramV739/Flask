@@ -52,7 +52,7 @@ More Information
 
 var gid="{{game.id}}"
     $('#startform').on('click',function() {
-            socket.emit('gotolb',gid);
+            socket.emit('gotolb',{q:"{{qnum}}",gid:gid});
             var locto="/leaderboardh/"+gid+"/"+"{{qnum}}";
             window.location.href=locto;})
 
