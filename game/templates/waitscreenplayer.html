@@ -24,7 +24,7 @@ Waiting for Game to Start
     var gid = "{{ game.id }}";
     var socket = io({'multiplex': false});
 
-    window.onload = function() {
+    window.onload = function(){
       console.log(gid);
 
       // socket.on('connection',function() {
@@ -52,7 +52,7 @@ Waiting for Game to Start
       })
     }
   </script>
-
+  
   <style>
     body {
       background-color: #e6e6e6;
@@ -102,47 +102,9 @@ Waiting for Game to Start
   </style>
 </div>
 
+<script type="text/javascript">
+  {% include "listen.js" %}
+</script>
+
 {% endblock %}
 
-<!-- {% raw %}
- {%extends 'base.html'%}
-{%block title%}
-Waiting for Game to Start
-{%endblock%}
-{%block content%}
-
-Waiting for the host to start game.
-<div class="container" id="plist">
-    
-
-    </div>
-    <script>
-    var gid="{{game.id}}"
-    var socket=io({'multiplex': false})
-    
-    window.onload=function(){
-        console.log(gid);
-        
-    // socket.on('connection',function() {
-        socket.emit('newc',gid);}
-        socket.on('disconnect', function(){
-console.log('disconnected...')
-})  
-    socket.on('addnewc',function(data){
-      if (gid==data.gameid){  
-console.log(data.players)
-        //var pls=JSON.parse(players)
-        $("#plist").text('')
-        for (p in data.players){
-            
-        $("#plist").append(" <div style='margin-bottom: 5px' class='card text-center text-white bg-danger'><div class='card-body'>"+
-            data.players[p]+"</div></div>")
-    }}})
-    socket.on('gamehasstarted',function(gameid){
-        if (gid==gameid){
-            window.location.href="/question/{{player.id}}/{{game.id}}/0"
-        }
-    })
-</script>
-</div>
-{%endblock%}{% endraw %} -->
