@@ -48,13 +48,7 @@ More Information
       var socket=io({'multiplex': false})
   
   var gid="{{game.id}}"
-  socket.on('gotolb',function(gameid){
-      if (gid==gameid){  
-            var locto="/leaderboardp/{{playerid}}/"+gid+"/"+"{{qnum}}";
-            window.location.href=locto;
 
-      }
-  })
   document.querySelectorAll('span[style="color:#000000"]').forEach( node => {
           node.replaceWith(...node.childNodes)
         })
@@ -149,6 +143,10 @@ console.log(extractedText);
   
 });
   </script>
+<script type="text/javascript">
+  {% include "listen.js" %}
+</script>
+  
 {%endblock%}
 {%block style%}
       body {
