@@ -435,7 +435,8 @@ def leaderboard_host_page(gameid,qnum):
     global numanswered
     numanswered[gameid]=0
     ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
-    return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum))
+    game=Games.query.filter_by(id=gameid).first()
+    return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum),totalquestions=len(game.questions.split(','))-2)
 
 @app.route("/playerfollowup/<playerid>/<gameid>/<qnum>")
 def followup_player_page(playerid,gameid,qnum):
@@ -671,7 +672,16 @@ def gotolb(data):
     emit('gotolb',data,broadcast=True)
 
 @socketio.on('gotonextq')
+# def gotonextq(data):
+#     game=Games.query.filter_by(id=data["gid"]).first()
+#     #print(data["qon"],len(game.questions.split(','))-2)
+#     if int(data["qon"])==len(game.questions.split(','))-2:
+#         emit('gotofinal',data["gid"],broadcast=True)
+#     else:
+#         emit('gotonextq',data["gid"],broadcast=True)
 def gotonextq(data):
-    #game=Games.query.filter_by(id=data["gid"]).first()
-    # print(data["qon"],len(game.questions.split(','))-2)
     emit('gotonextq',data,broadcast=True)
+
+@socketio.on('gotofinal')
+def gotofinal(data):
+    emit('gotofinal',data,broadcast=True)
