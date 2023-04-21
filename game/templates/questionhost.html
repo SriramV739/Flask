@@ -217,7 +217,6 @@ var x = setInterval(function() {
 document.getElementById("timer").innerHTML = Math.round(time)
 $('#startform').on('click',function() {
     socket.emit('timeup',gid);})
-
   socket.on('oneanswer',function(data){
   console.log("Hello");
   if(gid==data){
