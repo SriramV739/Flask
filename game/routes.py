@@ -27,7 +27,9 @@ from sqlalchemy.orm import sessionmaker
 from flask_login import login_user,logout_user, login_required, current_user
 import random
 from flask_socketio import SocketIO,send, emit
+from engineio.payload import Payload
 import time
+Payload.max_decode_packets = 1000
 #print("sdfsfkj")
 removed={}
 numconnected={}
@@ -83,7 +85,7 @@ def waiting_page(playerid,gameid):
     else:
         numconnected[gameid]+=1
     return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first()
-    ,player=Players.query.filter_by(id=playerid).first(),pnames=pnames[gameid])
+    ,player=Players.query.filter_by(id=playerid).first(),pnames=pnames[gameid],playerid=playerid)
 @app.route("/questionhost/<gameid>/<qnum>",methods=["GET","POST"])
 def question_host_page(gameid,qnum):
     global numanswered
@@ -150,10 +152,14 @@ def multiquestion_page(playerid,gameid,qnum):
     qnum=int(qnum)
     game=Games.query.filter_by(id=gameid).first()
     player=Players.query.filter_by(id=int(playerid)).first()
-    question_title = game.questions.split(',')[qnum]#.replace("'", "")
-    #oqry="Select correct_choice FROM question WHERE title='"+question_title+"'"
     oqry="Select correct_choice FROM question WHERE title=%s"
-    corrans=engine.execute(oqry,(question_title)).fetchall()[0][0]-1
+    try:
+        question_title = game.questions.split(',')[qnum]#.replace("'", "")
+        corrans=engine.execute(oqry,(question_title)).fetchall()[0][0]-1
+
+    except:
+        pass
+    #oqry="Select correct_choice FROM question WHERE title='"+question_title+"'"
     if request.method=="POST" and request.form.get("timeleft") is not None:
         timel=float(request.form.get("timeleft"))
         #print(timel+1000000)
@@ -184,11 +190,16 @@ def multiquestion_page(playerid,gameid,qnum):
     oqry="Select question_content FROM question WHERE title=%s"
     #oqry="Select question_content FROM question WHERE title='"+str(game.questions.split(',')[int(qnum)])+"'"
     #q=engine.execute(oqry).fetchall()[0][0]
-    q=engine.execute(oqry,(str(game.questions.split(',')[int(qnum)]))).fetchall()[0][0]
     result = []
+    try:
+        q=engine.execute(oqry,(str(game.questions.split(',')[int(qnum)]))).fetchall()[0][0]
+        for item in q.split("["):
+            result.extend(item.split("]"))
+    except:
+        pass
+    
 
-    for item in q.split("["):
-        result.extend(item.split("]"))
+    
 
     #print(result)
     for i in range(len(result)):
@@ -222,7 +233,7 @@ def multiquestion_page(playerid,gameid,qnum):
     #print(result)
     q = " ".join(result)
     return render_template("question.html",engine=engine,qnum=int(qnum),form=form,q=q
-    ,player=player,game=game)
+    ,player=player,game=game,playerid=playerid)
 
 def delete_players_helper(pg):
     try:
@@ -367,7 +378,7 @@ def player_result_page(playerid,gameid,qnum):
                     removed[gameid]=list(set(removed[gameid]))
             pass
 
-    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[qnum])
+    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[-1])
     if pans!="":
         pans=int(pans)
     #print("-"+str(pans))
@@ -412,7 +423,7 @@ def player_result_page(playerid,gameid,qnum):
     q = " ".join(result)
     #print(q)
     return render_template("resultplayer.html",player=Players.query.filter_by(id=playerid).first(),game=game,qnum=int(qnum)
-    ,corrans=corrans,subnums=subnums,pans=pans,engine=engine,q=q)
+    ,corrans=corrans,subnums=subnums,pans=pans,engine=engine,q=q,playerid=playerid)
 
 @app.route("/leaderboardp/<playerid>/<gameid>/<qnum>")
 def leaderboard_player_page(playerid,gameid,qnum):
@@ -634,13 +645,13 @@ def newc(gid):
     print(pnames[gid])
     emit('addnewc',{"players": pnames[gid],"gameid":gid},broadcast=True)
 @socketio.on('oneanswer')
-def oneanswer(gid):
+def oneanswer(data):
     #print("LKJSLKDJFLKSDJFKLSDJFLKSD")
-    emit('oneanswer',gid,brodcast=True)
+    emit('oneanswer',data,brodcast=True)
 @socketio.on('gamehasstarted')
-def gamehasstarted(gid):
+def gamehasstarted(data):
     print('ghs')
-    emit('gamehasstarted',gid,broadcast=True)
+    emit('gamehasstarted',data,broadcast=True)
 
 @socketio.on('tleft')
 def timeleft(data):
@@ -648,22 +659,19 @@ def timeleft(data):
     emit('tleft',data,broadcast=True)
 
 @socketio.on('timeup')
-def timeup(gid):
-    emit('timeup',gid,broadcast=True)
+def timeup(data):
+    emit('timeup',data,broadcast=True)
 
 @socketio.on('gotofollowup')
-def gotofollowup(gid):
-    emit('gotofollowup',gid,broadcast=True)
+def gotofollowup(data):
+    emit('gotofollowup',data,broadcast=True)
 
 @socketio.on('gotolb')
-def gotolb(gid):
-    emit('gotolb',gid,broadcast=True)
+def gotolb(data):
+    emit('gotolb',data,broadcast=True)
 
 @socketio.on('gotonextq')
 def gotonextq(data):
-    game=Games.query.filter_by(id=data["gid"]).first()
-    #print(data["qon"],len(game.questions.split(','))-2)
-    if int(data["qon"])==len(game.questions.split(','))-2:
-        emit('gotofinal',data["gid"],broadcast=True)
-    else:
-        emit('gotonextq',data["gid"],broadcast=True)
+    #game=Games.query.filter_by(id=data["gid"]).first()
+    # print(data["qon"],len(game.questions.split(','))-2)
+    emit('gotonextq',data,broadcast=True)
