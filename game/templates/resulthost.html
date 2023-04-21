@@ -81,7 +81,7 @@ Results
 
     var gid="{{game.id}}"
     $('#startform').on('click',function() {
-            socket.emit('gotofollowup',gid);
+            socket.emit('gotofollowup',{q:"{{qnum}}",gid:gid});
             var locto="/hostfollowup/"+gid+"/"+"{{qnum}}";
             window.location.href=locto;})
             document.querySelectorAll('span[style="color:#000000"]').forEach( node => {
