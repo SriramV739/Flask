@@ -74,7 +74,9 @@ Results
         {% endfor %}
     </tbody>
 </table>
+<h5>Game Code: {{code}}</h5>
 <button class="btn btn-lg btn-primary p-4" id="startform" style="margin-top: 20px; font-size: 24px;">Continue</button>
+
 
 <script>
     var socket=io({'multiplex': false})
@@ -83,6 +85,7 @@ Results
     $('#startform').on('click',function() {
             socket.emit('gotofollowup',{q:"{{qnum}}",gid:gid});
             var locto="/hostfollowup/"+gid+"/"+"{{qnum}}";
+            console.log('gotofollowup');
             window.location.href=locto;})
             document.querySelectorAll('span[style="color:#000000"]').forEach( node => {
           node.replaceWith(...node.childNodes)
