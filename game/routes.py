@@ -132,7 +132,7 @@ def question_host_page(gameid,qnum):
     #print(result)
     q = " ".join(result)
     return render_template("questionhost.html",engine=engine,qnum=int(qnum),q=q,
-    game=game,numconnected=numconnected[gameid],pnames=pnames[gameid],numanswered=numanswered[gameid])
+    game=game,numconnected=numconnected[gameid],pnames=pnames[gameid],numanswered=numanswered[gameid],code=game.code)
 
 @app.route("/singlequestion/<qnum>",methods=["GET","POST"])
 def question_page(qnum):
@@ -436,7 +436,7 @@ def leaderboard_host_page(gameid,qnum):
     numanswered[gameid]=0
     ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
     game=Games.query.filter_by(id=gameid).first()
-    return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum),totalquestions=len(game.questions.split(','))-2)
+    return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum),totalquestions=len(game.questions.split(','))-2,code=game.code)
 
 @app.route("/playerfollowup/<playerid>/<gameid>/<qnum>")
 def followup_player_page(playerid,gameid,qnum):
@@ -566,7 +566,7 @@ def host_result_page(gameid,qnum):
     q = " ".join(result)
     #print(q)    
     return render_template("resulthost.html",game=game,qnum=int(qnum),q=q
-    ,corrans=corrans,subnums=subnums,engine=engine)
+    ,corrans=corrans,subnums=subnums,engine=engine,code=game.code)
 
 @app.route("/hostfollowup/<gameid>/<qnum>")
 def followup_host_page(gameid,qnum):
@@ -609,7 +609,7 @@ def followup_host_page(gameid,qnum):
                 #     result[i]=str(result[i])
     #print(result)
     q = " ".join(result)
-    return render_template("followuphost.html",q=q,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum))
+    return render_template("followuphost.html",q=q,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum),code=game.code)
 
 @app.route("/podium/<gameid>")
 def podium_page(gameid):
