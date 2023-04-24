@@ -51,7 +51,8 @@ color: #0a0a0a;
         <div class="progress">
           <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
         </div>
-        <br><br>  
+        <br><br>
+        <h5>Game Code: {{code}}</h5>
         <!-- {set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"} -->
         <h3 class="mb-4" style="font-size: 1.3rem !important;">{{q|safe}}</h3>
         <form method="POST" id="qform">
