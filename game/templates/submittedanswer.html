@@ -3,7 +3,51 @@
 Waiting for Other Players
 {%endblock%}
 {%block content%}
-<h2>Waiting for other players to finish.</h2>
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    /* background-color: #f2f2f2; */
+  }
+
+  .card {
+    width: 400px;
+    padding: 20px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    background-color: #fff;
+  }
+
+  /* .card-header {
+    background-color: #f2f2f2;
+    border-bottom: none;
+  } */
+
+  .card-title {
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    text-transform: uppercase;
+    margin-bottom: 0;
+  }
+</style>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="card-title">Waiting for other players to finish</h5>
+    </div>
+  </div>
+</div>
+
 <script>
   var count=0;
     var gid="{{game.id}}"

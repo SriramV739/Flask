@@ -377,10 +377,13 @@ def player_result_page(playerid,gameid,qnum):
                     removed[gameid].append(player.name)
                     removed[gameid]=list(set(removed[gameid]))
             pass
-
-    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[-1])
+    print(Players.query.filter_by(id=playerid).first().submission.strip())
+    pans=(Players.query.filter_by(id=playerid).first().submission.strip().split(';')[-2])
     if pans!="":
         pans=int(pans)
+    print('aflkajdflkfas')
+    print(pans)
+    print("jfasdfjnasjdfasjdfasjdfsdf")
     #print("-"+str(pans))
     qry="Select question_content FROM question WHERE title='"+game.questions.split(',')[qnum]+"'"
     #HINTS AND SOURCES

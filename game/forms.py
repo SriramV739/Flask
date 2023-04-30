@@ -21,7 +21,7 @@ class StartGameForm(FlaskForm):
             if Games.query.filter_by(code=code.data).count() > 0:
                     print(Games.query.filter_by(code=code.data).count())
                     raise ValidationError('Code already exists! Please try a different code')
-    code=StringField(validators=[DataRequired(),Length(min=5,max=20)])
+    code=StringField(validators=[DataRequired(),Length(min=3,max=11)])
     submit = SubmitField(label='Start')
 class SubmitAnswerForm(FlaskForm):
     submitb=SubmitField(label='Submit')
