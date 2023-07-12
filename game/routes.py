@@ -60,6 +60,9 @@ def index():
 @app.route("/players")
 def player():
     return render_template("players.html")
+@app.route("/aboutus")
+def aboutus():
+    return render_template("aboutus.html")
 @app.route("/join",methods=["GET","POST"])
 def join_page():
     form=JoinForm()
@@ -288,10 +291,12 @@ def start_page():
                 #db.session.commit()
             session["handles"].append(form.code.data)
             gamechoice = str(request.form.get("game_choice"))
+
             print(gamechoice)
             qry="Select * FROM game_category WHERE game='"+gamechoice+"'"
             gamerow=engine.execute(qry).fetchall()[0]
-           # print(gamerow)
+            print(12349002)
+            print(gamerow)
             qry="Select title FROM question WHERE categories LIKE '%%"+gamerow[6]+"%%'" ##might need to change to gamerow[1]
             pqs=list(engine.execute(qry).fetchall())
             #print(pqs)
@@ -384,13 +389,10 @@ def player_result_page(playerid,gameid,qnum):
                     removed[gameid].append(player.name)
                     removed[gameid]=list(set(removed[gameid]))
             pass
-    print(Players.query.filter_by(id=playerid).first().submission.strip())
-    pans=(Players.query.filter_by(id=playerid).first().submission.strip().split(';')[-2])
+
+    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[-1])
     if pans!="":
         pans=int(pans)
-    print('aflkajdflkfas')
-    print(pans)
-    print("jfasdfjnasjdfasjdfasjdfsdf")
     #print("-"+str(pans))
     qry="Select question_content FROM question WHERE title='"+game.questions.split(',')[qnum]+"'"
     #HINTS AND SOURCES
