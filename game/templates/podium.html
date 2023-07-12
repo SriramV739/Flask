@@ -3,13 +3,16 @@
 Podium
 {%endblock%}
 {%block content%}
-<div style="padding: 20px; text-align:center;">
+<div style="padding: 10px; text-align:center;">
     <h3>The game has finished!</h3>
   </div>
-<div class="row" style="margin-top:20px; margin-left:20px;">
+  <div class="container">
+  <div class="row">
+  <div class="col-md-6">
+<div class="row" style="margin-top:20px;">
         <div class="container" id="plist">
-            <div class="row justify-content-center mt-5">
-              <div class="col-md-8">
+            <div class="justify-content ">
+              <!-- <div class="col-md-8"> -->
                 <div class="card">
                   <div class="card-header bg-danger text-white">
                     <h4>Leaderboard</h4>
@@ -18,7 +21,9 @@ Podium
                     {% set ns = namespace(rank=0) %}
                     {% for player in ps %}
                     {% set ns.rank = ns.rank + 1 %}
-                    <div class="row mb-2">
+                    {%if ns.rank>5%}
+                    {%else%}
+                    <div class="row">
                       <div class="col-1 align-self-center card-text text-black">
                         {% if ns.rank == 1 %}
                         &#x1F947;
@@ -37,16 +42,83 @@ Podium
                         <p class="card-text text-black">{{ player.score }}</p>
                       </div>
                     </div>
+                    {%endif%}
                     {% endfor %}
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <style>
+          </div>
+
+          <div class="col-md-6">
+            
+<!--  -->
+<div>
+  
+          <!-- <a href="./choose-a-game.html" class="button"><span>Play Again</span></a> -->
+          
+          
+      </div> 
+      <a href="/join" target="_blank" class="btn btn-primary"style="width:85%"><span>Play Again</span></a><br>
+      <h5>Did you know it only takes an average of two minutes to register? Get started now.</h5>
+      <a href="https://vote.gov" target="_blank" class="btn btn-info" style="width:85%" ><span>Register to vote</span></a>
+      <h5 class="text-column">Step up and help empower other voters to defend our democracy.</h5>
+      <a href="https://www.lwv.org/local-leagues/find-local-league" target="_blank" class="btn btn-primary" style="width:85%"><span>Join the LWV</span></a>
+      <h5 class="text-column">Help keep VerifyIt! ad free.</h5>
+      <a href="https://www.paypal.com/donate/?hosted_button_id=PYPXTBVB94URL&source=url" class="btn btn-info" target="_blank" class="button" style="width:85%"><span>Please Donate!</span></a>
+
+  
+  
+  
+  <div class="row text-center">
+      <!-- <div class="col-sm-12"> -->
+      </div>
+  <!-- <div class="row footer"> -->
+      <h5>Please like us on your social media!</h5>
+        <a target="_blank" href="https://www.facebook.com/Verify-It-101796721661445" class="btn btn-primary rounded-circle facebook-button">
+          <i class="fab fa-facebook-f facebook-logo"></i>
+        </a>
+        <a href="https://twitter.com/Veri_fy_It_Game" target="_blank" class="btn btn-primary rounded-circle twitter-button">
+          <i class="fab fa-twitter twitter-logo"></i>
+        </a>
+        <a href="https://www.instagram.com/verifyitgame/" target="_blank" class="btn btn-primary rounded-circle instagram-button">
+          <i class="fab fa-instagram instagram-logo"></i>
+        </a>
+      <hr class="divider" />
+      <a class="verify-link" href="/">
+          <!-- <img src="../images/lwv-square-logo.png" style="background-color: white; height:7vh;"> -->
+          <h3 style="font-weight: bold;">PLAY <span style="color:#87CEFA">VERIFY</span><span style="color:rgb(247, 36, 36)">IT!</span>™</h3>
+      </a>
+  </div></div></div>
+
+<style>
+body {
+  background-color: #89C4FF;
+  color: black;
+}
             .card-title, .card-text, .col-1{
               color: black;
             }
+.facebook-button {
+  background-color: #3b5998;
+  
+}
+.instagram-button {
+  background-color: #E4405F;
+  
+}
+
+.facebook-logo
+.twitter-logo {
+  color: white;
+  font-size: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
           </style>
 <!--{%raw%} <div class="container" id="plist">
     {%for i in range(ps.count())%}
@@ -66,4 +138,10 @@ Podium
           </div></div>
           {%endfor%}
 </div> {%endraw%}-->
+{%endblock%}
+{%block style%}
+      body {
+      background-color: #85B4FF;
+      color: black
+      }
 {%endblock%}

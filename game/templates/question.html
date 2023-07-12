@@ -16,6 +16,33 @@ box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 z-index: 9999;
 display: none;
 }
+.uniforms img{
+    /* width:100%; */
+    max-width:300px;
+    height:auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+.uniforms h1 {
+  font-size: 1.25rem;
+ }
+.uniforms h2 {
+  font-size: 1.25rem;
+ }
+.uniforms h3 {
+  font-size: 1.25rem;
+}
+.uniforms h4 {
+  font-size: 1.25rem;
+}
+.uniforms h5 {
+  font-size: 1.25rem;
+}
+.uniforms h6 {
+  font-size: 1.25rem;
+} 
 
 .popup-overlay {
 position: fixed;
@@ -53,8 +80,8 @@ color: #0a0a0a;
 </div>
     <br><br>  
     <!-- {set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"} -->
-    <h3 class="mb-4" style="font-size: 1.3rem;">{{q|safe}}</h3>
-<form method="POST" id="qform">
+    <div class="mb-4 uniforms" style="font-size: 1.25rem !important; font-family: Quicksand, arial, sans, sans-serif;">{{q|safe}}
+      <form method="POST" id="qform">
   {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
   {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
   {%set cc=namespace(curcat=0)%}
@@ -67,7 +94,7 @@ color: #0a0a0a;
     {%endfor%}
   <input id="timeleft" name="timeleft" type="hidden">
     <!-- {form.submitb(class="btn btn-lg btn-primary p-4") -->
-</form>
+</form></div>
 
 </div></div>
 <div class="col-2">

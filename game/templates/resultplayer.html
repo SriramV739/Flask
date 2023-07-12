@@ -43,12 +43,40 @@ Results
   .popup-close:hover {
   color: #0a0a0a;
   }
+  .uniforms img{
+    /* width:100%; */
+    max-width:300px;
+    height:auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    
+}
+.uniforms h1 {
+  font-size: 1.25rem;
+ }
+.uniforms h2 {
+  font-size: 1.25rem;
+ }
+.uniforms h3 {
+  font-size: 1.25rem;
+}
+.uniforms h4 {
+  font-size: 1.25rem;
+}
+.uniforms h5 {
+  font-size: 1.25rem;
+}
+.uniforms h6 {
+  font-size: 1.25rem;
+} 
   </style>
   <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12 col-md-8">
 {% set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'" %}
-<h3 class="mb-4" style="font-size: 1.3rem !important;">{{q|safe}}</h3></div></div></div>
+<div class="mb-4 uniforms" style="font-size: 1.25rem !important; font-family: Quicksand, arial, sans, sans-serif;">{{q|safe}}
+</div></div></div></div>
 
 {% if corrans == pans %}
     {% set sty = "bg-success" %}
