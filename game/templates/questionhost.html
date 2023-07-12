@@ -54,15 +54,16 @@ color: #0a0a0a;
         <br><br>
         <h5>Game Code: {{code}}</h5>
         <!-- {set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"} -->
-        <h3 class="mb-4" style="font-size: 1.3rem !important;">{{q|safe}}</h3>
+        <div class="mb-4 uniforms" style="font-size: 1.25rem !important; font-family: Quicksand, arial, sans, sans-serif;">{{q|safe}}
         <form method="POST" id="qform">
-          {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-          {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
+          <!-- {set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"}
+          {set choices=engine.execute(qry).fetchall()[0][0].split('\n')} -->
           {%for c in range(choices|length)%}
             {%if choices[c][2:4]=="li"%}
               <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{choices[c][5:-5]|safe}}</h5>
             {%endif%}
           {%endfor%}
+        </div>
           <input id="timeleft" name="timeleft" type="hidden">
         </form>
       </div>
@@ -308,9 +309,38 @@ input[type="radio"] {
   margin-top: 10px;
 }
 
-p {
+/* p {
   font-size: 16px;
+} */
+.uniforms img{
+    /* width:100%; */
+    max-width:300px;
+    height:auto !important;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    
 }
+.uniforms h1 {
+  font-size: 1.25rem;
+ }
+.uniforms h2 {
+  font-size: 1.25rem;
+ }
+.uniforms h3 {
+  font-size: 1.25rem;
+}
+.uniforms h4 {
+  font-size: 1.25rem;
+}
+.uniforms h5 {
+  font-size: 1.25rem;
+}
+.uniforms h6 {
+  font-size: 1.25rem;
+} 
+
+
 </style>
 {%endblock%}
 {%block style%}
