@@ -69,7 +69,14 @@ document.querySelectorAll('em > strong, strong > em').forEach(element => {
   console.dir(strElement)
   //const spanElement = strElement.parentNode;
   
-  const nextspan = strElement.nextElementSibling;
+   nextspan = strElement.nextElementSibling;
+  if (!nextspan){
+    
+    nextspan = document.createElement('span');
+    nextspan.innerHTML = '<!--A hint will be added here soon!-->';
+    strElement.parentNode.appendChild(nextspan);
+    
+  }
   console.dir(nextspan);
   content=nextspan.innerHTML
   console.log(content)

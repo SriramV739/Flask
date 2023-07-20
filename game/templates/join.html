@@ -9,10 +9,17 @@ Join a Game
         <form method="POST">
             {{form.hidden_tag()}}
             {{form.name(class="form-control custom-input", placeholder="Name")}}<br>
-            {{form.code(class="form-control  custom-input", placeholder="Enter a Game Code")}}<br>
+            {{form.code(class="form-control  custom-input", placeholder="Enter a Game Code",oninput="formatcode(event)")}}<br>
             {{form.submit(class="btn btn-lg btn-block btn-primary")}}
         </form>
     </div>
     
 </div>
+<script>
+    function formatcode(event) {
+     const input = event.target;
+     const value = input.value.replace(/\s/g, '').toUpperCase();
+     input.value = value;
+   }
+ </script>
 {%endblock%}

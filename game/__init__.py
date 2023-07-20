@@ -16,6 +16,19 @@ from game import models
 #db.create_all()
 #db.drop_all()
 #db.create_all()
+with app.app_context():
+    try:
+        # Begin a transaction
+        db.session.begin()
+
+        # ... your code here ...
+
+        # Commit the transaction if everything is successful
+        db.session.commit()
+    except Exception as e:
+        # Roll back the transaction in case of an error
+        db.session.rollback()
+        raise e
 socketio=SocketIO(app,logger=False)
 socketio.init_app(app, cors_allowed_origins="*")
 logging.getLogger('socketio').setLevel(logging.ERROR)

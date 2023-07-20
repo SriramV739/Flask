@@ -144,8 +144,15 @@ document.querySelectorAll('em > strong, strong > em').forEach(element => {
   console.dir(strElement)
   //const spanElement = strElement.parentNode;
   
-  const nextspan = strElement.nextElementSibling;
+   nextspan = strElement.nextElementSibling;
   console.dir(nextspan);
+  if (!nextspan){
+    
+    nextspan = document.createElement('span');
+    nextspan.innerHTML = '<!--A hint will be added here soon!-->';
+    strElement.parentNode.appendChild(nextspan);
+    
+  }
   content=nextspan.innerHTML
   console.log(content)
   const startIndex = content.indexOf('<!--') + 4;
