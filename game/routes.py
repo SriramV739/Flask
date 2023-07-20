@@ -390,7 +390,8 @@ def player_result_page(playerid,gameid,qnum):
                     removed[gameid]=list(set(removed[gameid]))
             pass
 
-    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[-1])
+    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[-2])
+    print(pans+"----------------")
     if pans!="":
         pans=int(pans)
     #print("-"+str(pans))

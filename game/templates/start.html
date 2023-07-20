@@ -3,6 +3,13 @@
 Start a Game
 {% endblock %}
 {% block content %}
+<script>
+   function formatcode(event) {
+    const input = event.target;
+    const value = input.value.replace(/\s/g, '').toUpperCase();
+    input.value = value;
+  }
+</script>
 <div class="text-center" style="padding: 20px">
     <h3 style="color: white; font-weight: bold;">Start a Game</h3>
   </div>
@@ -71,15 +78,54 @@ Start a Game
         </div>
         <div class="col-4">
             <div class="d-flex justify-content-center">
-                {{form.code(class="form-control text-center w-50", placeholder="Create a Join Code")}}<br>
+                {{form.code(class="form-control text-center w-50", placeholder="Create a Join Code",oninput="formatcode(event)")}}<br>
             </div>
+            <br>
             <div class="d-flex justify-content-center">
                 {{form.submit(class="btn btn-lg btn-primary p-4")}}
             </div>
             <br>
+            <div class="d-flex justify-content-center instructions-box">
+              <!-- Your instructions or content here -->
+              <div class="instructions-title">How to Start:</div>
+              <ol class="instructions-list">
+                <li>Select a game using the dropdown menu to the right.</li>
+                <li>Create your own join code for the game. The code can include both numbers and letters.</li>
+                <li>Click 'Start' to begin!</li>
+              </ol>
+            </div>
         </div>
     </div>
 </form>
+<style>
+  .instructions-box {
+    max-width: 350px; /* Adjust the width as desired */
+    margin: 20px auto;
+    background-color: #7ca2ce; /* Blue background color */
+    color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .instructions-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .instructions-list {
+    list-style-type: decimal;
+    padding-left: 20px;
+    margin: 0;
+    text-align: left;
+  }
+</style>
 {% endblock %}
 
 {% block style %}
@@ -101,7 +147,9 @@ Start a Game
     .collapse {
         display: table-row;
     }
-</style>
+   
+    
+
 {% endblock %}
 
 

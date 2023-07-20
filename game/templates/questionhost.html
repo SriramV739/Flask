@@ -143,12 +143,22 @@ document.querySelectorAll('em > strong, strong > em').forEach(element => {
   element.style.cursor = 'pointer';
 
   // create popup element
-  console.log(element.nodeType);
+  //console.log(element.nodeType);
   const strElement = element.parentNode;
-  console.dir(strElement)
+
+  //console.dir(strElement)
+  
   //const spanElement = strElement.parentNode;
   
-  const nextspan = strElement.nextElementSibling;
+  nextspan = strElement.nextElementSibling;
+  //console.dir(nextspan);
+  if (!nextspan){
+    
+    nextspan = document.createElement('span');
+    nextspan.innerHTML = '<!--A hint will be added here soon!-->';
+    strElement.parentNode.appendChild(nextspan);
+    
+  }
   console.dir(nextspan);
   content=nextspan.innerHTML
   console.log(content)
