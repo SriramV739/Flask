@@ -73,24 +73,22 @@ color: #0a0a0a;
 <div class="container">
   <div class="row" style="margin-top:20px; margin-left:20px;">
     <div class="col-10">
-      <div class="text-left" style="display: inline"><h5>Question {{qnum+1}} of {{game.questions.split(',')|length-1}}</h5></div>
+      <div class="text-left" style="display: inline"><h5>Question {{qnum+1}} of {{total}}</h5></div>
 
     <div class="text-right" style="display: inline"><h5>&#11088; {{player.score}}</h5></div><div>
 <div class="progress">
   
-  <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
+  <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/total}}%"></div>
 </div>
     <br><br>  
     <!-- {set qry="Select question_content FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"} -->
     <div class="mb-4 uniforms" style="font-size: 1.25rem !important; font-family: Quicksand, arial, sans, sans-serif;">{{q|safe}}
       <form method="POST" id="qform">
   {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-  {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
   {%set cc=namespace(curcat=0)%}
-  {%for c in range(choices|length)%}
-  
-  {%if choices[c][2:4]=="li"%}
-  <h5><button name="choice" value="{{cc.curcat}}" class="choice" onclick=processButton(id)>&nbsp;{{choices[c][5:-5]|safe}}</h5>
+  {%for i in currentchoice%}
+  {%if i|length!=0%}
+  <h5><button name="choice" value="{{cc.curcat}}" class="choice" onclick=processButton(id)>&nbsp;{{i|safe}}</h5>
     {%set cc.curcat=cc.curcat+1%}
     {%endif%}
     {%endfor%}

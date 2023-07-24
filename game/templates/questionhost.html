@@ -48,10 +48,10 @@ color: #0a0a0a;
     <div class="col-10">
       <div class="text-end"><h5></h5></div>
       <div>
-        <div class="text-left" style="display: inline"><h5>Question {{qnum+1}} of {{game.questions.split(',')|length-1}}</h5></div>
+        <div class="text-left" style="display: inline"><h5>Question {{qnum+1}} of {{total}}</h5></div>
 
         <div class="progress">
-          <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/(game.questions.split(',')|length-1)}}%"></div>
+          <div class="progress-bar" role="progressbar" style="width: {{100*(qnum+1)/total}}%"></div>
         </div>
         <br><br>
         <h5>Game Code: {{code}}</h5>
@@ -60,10 +60,8 @@ color: #0a0a0a;
         <form method="POST" id="qform">
           <!-- {set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"}
           {set choices=engine.execute(qry).fetchall()[0][0].split('\n')} -->
-          {%for c in range(choices|length)%}
-            {%if choices[c][2:4]=="li"%}
-              <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{choices[c][5:-5]|safe}}</h5>
-            {%endif%}
+          {%for i in choices%}
+          <h5><input type="radio" name="choice" value="{{c}}">&nbsp;{{i|safe}}</h5>
           {%endfor%}
         </div>
           <input id="timeleft" name="timeleft" type="hidden">

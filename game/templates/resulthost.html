@@ -59,18 +59,15 @@ Results
     </thead>
     <tbody>
         <!-- Your rows inside the table HERE: -->
-        {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%}
-        {%set choices=engine.execute(qry).fetchall()[0][0].split('\n')%}
+        <!-- {%set qry="Select choices FROM question WHERE title='"~game.questions.split(',')[qnum]~"'"%} -->
         {%set cc=namespace(curcat=0)%}
-        {%for c in range(choices|length)%}
-            {%if choices[c][2:4]=="li"%}
+        {%for c in choices%}
                 <tr>
                     <td style="font-weight: bold;">{% if cc.curcat == corrans %}&#10004; {% endif %}</td>
                     <td style="font-weight: bold;">{{subnums[cc.curcat]}}</td>
-                    <td><p style="font-style: italic; margin: 0;">{{choices[c][5:-5]|safe}}</p></td>
+                    <td><p style="font-style: italic; margin: 0;">{{c|safe}}</p></td>
                 </tr>
                 {%set cc.curcat=cc.curcat+1%}
-            {%endif%}
         {% endfor %}
     </tbody>
 </table>

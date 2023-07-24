@@ -49,5 +49,5 @@ for i in range(len(arr)):
     except:
         print('Something went wrong!')
 
-print(engine.execute("Select question_content FROM question").fetchall()[2][0])
+print(engine.execute("select categories, no_questions from game_category where game = $1 -- e.g. 'Voting-TX Mixed News and Civics' and no_questions > 0").fetchall())
 

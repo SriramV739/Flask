@@ -20,9 +20,8 @@ Start a Game
             {% set cc = namespace(curcat="0") %}
             <table class="table table-hover table-bordered">
                 <tbody>
-                  {%set arr=["Civics","News","Voting"]%}
-                    {% for i in engine.execute("select game_group, name, description, no_questions from game join game_category on game.name = game_category.game where game_status = 'Production' and game_group is not null order by game_group, name").fetchall() %}
-                      {%if i[0] in arr%}
+                  
+                  {% for i in arr %}
                       {%set curr=i[0].replace(" ","")%}
                         {%set curr=curr.replace(".","")%}
                         {%set curr=curr.replace("/","")%}
@@ -45,33 +44,6 @@ Start a Game
                             <td>{{i[1]}}</td>
                             <td style="width: 10%">{{i[3]}}</td>
                         </tr>
-                        {% endif %}
-                    {% endfor %}
-                    {% for i in engine.execute("select game_group, name, description, no_questions from game join game_category on game.name = game_category.game where game_status = 'Production' and game_group is not null order by game_group, name").fetchall() %}
-                      {%if i[0] not in arr%}
-                      {%set curr=i[0].replace(" ","")%}
-                        {%set curr=curr.replace(".","")%}
-                        {%set curr=curr.replace("/","")%}
-                        {% if cc.curcat != i[0] %}
-                        <tr class="clickable" data-toggle="collapse" data-target=".{{curr}}" aria-expanded="true"  style="background-color: lightblue;">
-
-                                <td colspan="3"><strong>{{i[0]}}</strong> <span class="float-right fas fa-chevron-down"></span></td>
-                            
-
-                            </tr>
-                            <tr class="collapse {{curr}}">
-                                <th></th>
-                                <th>Name</th>
-                                <th># of Questions</th>
-                            </tr>
-                            {% set cc.curcat = i[0] %}
-                        {% endif %}
-                        <tr class="collapse {{curr}}">
-                            <td><input type="radio" name="game_choice" value="{{i[1]}}"></td>
-                            <td>{{i[1]}}</td>
-                            <td style="width: 10%">{{i[3]}}</td>
-                        </tr>
-                        {% endif %}
                     {% endfor %}
                 </tbody>
             </table>

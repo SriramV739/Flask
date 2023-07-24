@@ -76,7 +76,7 @@ socket.on('gotonextq',function(gameid){
     window.location.href=locto;
 }})
     $('#startform').on('click',function() {
-            if("{{totalquestions}}"=="{{qnum}}"){
+            if("{{totalnum}}"=="{{qnum}}"){
               socket.emit('gotofinal',{q:"{{qnum}}",gid:gid});
               var locto="/podium/"+gid
               window.location.href=locto;
