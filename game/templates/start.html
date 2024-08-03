@@ -20,7 +20,7 @@ Start a Game
             {% set cc = namespace(curcat="0") %}
             <table class="table table-hover table-bordered">
                 <tbody>
-                  
+
                   {% for i in arr %}
                       {%set curr=i[0].replace(" ","")%}
                         {%set curr=curr.replace(".","")%}
@@ -29,7 +29,7 @@ Start a Game
                         <tr class="clickable" data-toggle="collapse" data-target=".{{curr}}" aria-expanded="true"  style="background-color: lightblue;">
 
                                 <td colspan="3"><strong>{{i[0]}}</strong> <span class="float-right fas fa-chevron-down"></span></td>
-                            
+
 
                             </tr>
                             <tr class="collapse {{curr}}">
@@ -42,7 +42,7 @@ Start a Game
                         <tr class="collapse {{curr}}">
                             <td><input type="radio" name="game_choice" value="{{i[1]}}"></td>
                             <td>{{i[1]}}</td>
-                            <td style="width: 10%">{{i[3]}}</td>
+                            <td style="width: 10%">{{i[2]}}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
@@ -61,7 +61,7 @@ Start a Game
               <!-- Your instructions or content here -->
               <div class="instructions-title">How to Start:</div>
               <ol class="instructions-list">
-                <li>Select a game using the dropdown menu to the right.</li>
+                <li>Select a game using the dropdown menu to the left.</li>
                 <li>Create your own join code for the game. The code can include both numbers and letters.</li>
                 <li>Click 'Start' to begin!</li>
               </ol>
@@ -119,8 +119,8 @@ Start a Game
     .collapse {
         display: table-row;
     }
-   
-    
+
+
 
 {% endblock %}
 
