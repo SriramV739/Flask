@@ -12,15 +12,15 @@ def join():
     return render_template("join.html",form=form)
 if __name__=="__main__":
     app.run(debug=True)'''
-
+fout=open("/private/tmp/flaskout",'a')
 #from game.load import engine
-from game import app
+import game.dbModel, game.forms
 from flask import render_template, redirect,url_for, flash, request, session
-#from game.models import
+from game.models import *
 from game.forms import JoinForm,StartGameForm,SubmitAnswerForm
-from game import db,socketio
+from game import db,socketio,app
 from game.models import Games,Players
-from sqlalchemy import Column, Integer, Float, Date, String, VARCHAR, select, MetaData
+from sqlalchemy import Column, Integer, Float, Date, String, VARCHAR, select, MetaData,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine, delete, func
 from sqlalchemy.orm import sessionmaker
@@ -28,7 +28,30 @@ from flask_login import login_user,logout_user, login_required, current_user
 import random
 from flask_socketio import SocketIO,send, emit
 from engineio.payload import Payload
-import time
+import time,os,sys
+from sqlalchemy.orm  import DeclarativeBase,Mapped,mapped_column,Session
+import bs4
+
+
+class Base(DeclarativeBase):
+    pass
+
+class Game(Base):
+    __tablename__ = "game"
+    game_id = Column(Integer, primary_key=True)
+    game_name = Column(String(100))
+    game_status = Column(String(100))
+    game_group = Column(String(100))
+    game_description = Column(String(100))
+
+class GameCategory(Base):
+    __tablename__ = "game_category"
+    game_category_id = Column(Integer, primary_key=True)
+    game_id = Column(Integer, ForeignKey('game.game_id'))
+    gc_categories = Column(String(100))
+    no_questions = Column(Integer)
+
+
 Payload.max_decode_packets = 1000
 removed={}
 numconnected={}
@@ -36,8 +59,48 @@ numanswered={}
 pnames={}
 currentgame={}
 current={}
-import bs4
-from bs4 import BeautifulSoup
+
+
+
+
+
+TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL")
+TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN")
+
+dbUrl = f"sqlite+{TURSO_DATABASE_URL}/?authToken={TURSO_AUTH_TOKEN}&secure=true"
+
+try:
+    engine = create_engine(dbUrl, connect_args={'check_same_thread': False}, echo=True)
+except:
+    print("Can't create engine")
+
+Session = sessionmaker(bind=engine)
+session = Session()
+# session = Session(engine)
+
+
+#select game.game_group, game.game_name, game.game_description, GameCategory.no_questions from
+#game join game_category on game.game_name = game_category.game where game.game_status = 'Production'
+#and game.game_group is not null order by game_group, name limit 4
+
+query = session.query(Game, GameCategory) \
+    .join(GameCategory, Game.game_id == GameCategory.game_id) \
+    .filter(Game.game_status == 'Production') \
+    .filter(Game.game_group.isnot(None)) \
+    .order_by(Game.game_group, Game.game_name) \
+    .limit(20)
+
+# Execute the query and fetch all results
+results = query.all()
+# Print the results
+for game, category in results:
+    print(f"Game: {game.game_name}, Category: {category.gc_categories}, Number of Question: {category.no_questions}")
+
+# try:
+#     engine = create_engine(
+#         'postgresql://postgres.cqxvknmoofzuhxbonmoj:princely-tunic-670@aws-0-us-west-1.pooler.supabase.com:5432/postgres',echo=False)
+
+
 def clean(html_code):
 
     soup = BeautifulSoup(html_code, 'html.parser')
@@ -55,17 +118,8 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
-try:
-    engine = create_engine(
-        'postgresql://postgres:princely-tunic-670@db.cqxvknmoofzuhxbonmoj.supabase.co:5432/postgres',echo=False)
 
-except:
-    print("Can't create 'engine")
-#db.drop_all()
-#db.create_all()
-meta_data=MetaData()
 
-conn=engine.connect()
 def hintsandsources(q,gameid,qnum):
     result = []
 
@@ -306,11 +360,14 @@ def delete_players_helper1(pg):
 def start_page():
     form=StartGameForm()
     deleted_objects = Players.__table__.delete().where(float(delete_players_helper1(Players.game))<=time.time()-3600)
-    db.session.execute(deleted_objects)
-    db.session.commit()
-    deleted_objects = Games.__table__.delete().where(Games.starttime<=time.time()-3600)
-    db.session.execute(deleted_objects)
-    db.session.commit()
+    try:
+        db.session.execute(deleted_objects)
+        db.session.commit()
+        deleted_objects = Games.__table__.delete().where(Games.starttime<=time.time()-3600)
+        db.session.execute(deleted_objects)
+        db.session.commit()
+    except:
+        pass
     if form.validate_on_submit():
 
         if request.form.get("game_choice"):
@@ -333,6 +390,7 @@ def start_page():
                 #db.session.commit()
             session["handles"].append(form.code.data)
             gamechoice = str(request.form.get("game_choice"))
+            print(gamechoice)
 
             qry="Select * FROM game_category WHERE game='"+gamechoice+"'"
             gamerow=engine.execute(qry).fetchall()[0]
@@ -363,30 +421,58 @@ def start_page():
     arr=[[]]
     arr1=["Civics","News","Voting"]
     arr.append(['Play a Demo','LWV Demo','asdfa',4])
-    for i in engine.execute("select game_group, name, description, no_questions from game join game_category on game.name = game_category.game where game_status = 'Production' and game_group is not null order by game_group, name").fetchall():
-        if i[1] in dict1:
-            dict1[i[1]]+=i[3]
+    
+    query = session.query(Game, GameCategory) \
+        .join(GameCategory, Game.game_id == GameCategory.game_id) \
+        .filter(Game.game_status == 'Production') \
+        .filter(Game.game_group.isnot(None)) \
+        .order_by(Game.game_group, Game.game_name)
+    # Execute the query and fetch all results
+    results = query.all()
+    pass_to_start=[]
+    for game,category in results:
+        pass_to_start.append([game.game_group,game.game_name,category.no_questions])
+    common_names={}
+    for i in pass_to_start:
+        if i[0]+i[1] not in common_names:
+            common_names[i[0]+i[1]]=i[2]
         else:
-            dict1[i[1]]=i[3]
-    visited=[]
-    for i in engine.execute("select game_group, name, description, no_questions from game join game_category on game.name = game_category.game where game_status = 'Production' and game_group is not null order by game_group, name").fetchall():
-        if i[0] in arr1:
-            if i[1] not in visited:
-                visited.append(i[1])
-                arr.append([i[0],i[1],i[2],dict1[i[1]]])
-    for i in engine.execute("select game_group, name, description, no_questions from game join game_category on game.name = game_category.game where game_status = 'Production' and game_group is not null order by game_group, name").fetchall():
-        if i[0] not in arr1:
-            if i[1] not in visited:
-                visited.append(i[1])
-                arr.append([i[0],i[1],i[2],dict1[i[1]]])
+            common_names[i[0]+i[1]]+=i[2]
+    done=set()
+    pass_final=[]
+    for i in pass_to_start:
+        if i[0]+i[1] not in done:
+            done.add(i[0]+i[1])
+            pass_final.append([i[0],i[1],common_names[i[0]+i[1]]])
+    pass_to_start=pass_final
+    # for i in results:
+    #     if i[1] in dict1:
+    #         dict1[i[1]]+=i[3]
+    #     else:
+    # for i in results:
+    #     if i[1] in dict1:
+    #         dict1[i[1]]+=i[3]
+    #     else:
+    #         dict1[i[1]]=i[3]
+    # visited=[]
+    # for i in results:
+    #     if i[0] in arr1:
+    #         if i[1] not in visited:
+    #             visited.append(i[1])
+    #             arr.append([i[0],i[1],i[2],dict1[i[1]]])
+    # for i in results:
+    #     if i[0] not in arr1:
+    #         if i[1] not in visited:
+    #             visited.append(i[1])
+    #             arr.append([i[0],i[1],i[2],dict1[i[1]]])
 
-    arr3=[]
-    for i in range(len(arr)):
-        if len(arr[i])==0:
-            arr3.append(i)
-    for i in arr3:
-        arr.pop(i)
-    return render_template("start.html",engine=engine,form=form,arr=arr)
+    # arr3=[]
+    # for i in range(len(arr)):
+    #     if len(arr[i])==0:
+    #         arr3.append(i)
+    # for i in arr3:
+    #     arr.pop(i)
+    return render_template("start.html",engine=engine,form=form,arr=pass_to_start)
 @app.route("/waiting/host/<id>",methods=["GET","POST"])
 
 def waiting_host_page(id):
