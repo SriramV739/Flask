@@ -30,7 +30,8 @@ from flask_socketio import SocketIO,send, emit
 from engineio.payload import Payload
 import time,os,sys
 from sqlalchemy.orm  import DeclarativeBase,Mapped,mapped_column,Session
-import bs4
+from bs4 import BeautifulSoup
+
 
 
 class Base(DeclarativeBase):
@@ -51,6 +52,70 @@ class GameCategory(Base):
     gc_categories = Column(String(100))
     no_questions = Column(Integer)
 
+class Question(Base):
+    __tablename__ = "question"
+    question_id = Column(Integer, primary_key=True)
+    title = Column(String(100))
+    question_categories = Column(String(100))
+    question_content=Column(String(100))
+    followup=Column(String(100))
+    choices=Column(String(100))
+    correct_choice=Column(Integer)
+    hints=Column(String(100))
+
+class Games(Base):
+    __tablename__ = "Games"
+    id = Column(Integer, primary_key=True)
+    game=db.Column(db.String())
+    questions=db.Column(db.String())
+    code = db.Column(db.String(), nullable=False)
+    time = db.Column(db.Integer())
+    starttime=db.Column(db.Integer(),)
+    # players=db.relationship('Players',backref='owned_game',lazy=True,cascade='all,delete')
+
+
+class Players(Base):
+    __tablename__ = "Players"
+    id=db.Column(db.Integer(),primary_key=True)
+    name=db.Column(db.String())
+    score=db.Column(db.Integer())
+    # game_id=db.Column(db.Integer(),db.ForeignKey('Games.id'))
+    game_id=db.Column(db.Integer())
+    streak=db.Column(db.Integer())
+    result=db.Column(db.String())
+    submission=db.Column(db.String())
+
+class Source(Base):
+    __tablename__ = "source"
+    source_id=db.Column(db.String(),primary_key=True)
+    name=db.Column(db.String())
+    description=db.Column(db.String())
+    hints=db.Column(db.String())
+
+
+# class Games(Base):
+#     __tablename__ = "Games"
+#     id = Column(Integer, primary_key=True)
+#     game = db.Column(db.String())
+#     questions = db.Column(db.String())
+#     code = db.Column(db.String(), nullable=False)
+#     time = db.Column(db.Integer())
+#     starttime = db.Column(db.Integer())
+#     players = db.relationship('Players', backref='owned_game', lazy=True, cascade='all,delete')
+
+# class Players(Base):
+#     id = db.Column(db.Integer(), primary_key=True)
+#     name = db.Column(db.String(length=15))
+#     score = db.Column(db.Integer())
+#     game_id = db.Column(db.Integer(), db.ForeignKey('(link unavailable)'))
+#     streak = db.Column(db.Integer())
+#     result = db.Column(db.String())
+#     submission = db.Column(db.String())
+#     owned_game = db.relationship("Games", backref="players")
+
+
+
+
 
 Payload.max_decode_packets = 1000
 removed={}
@@ -59,8 +124,6 @@ numanswered={}
 pnames={}
 currentgame={}
 current={}
-
-
 
 
 
@@ -75,7 +138,7 @@ except:
     print("Can't create engine")
 
 Session = sessionmaker(bind=engine)
-session = Session()
+dbSession = Session()
 # session = Session(engine)
 
 
@@ -83,7 +146,7 @@ session = Session()
 #game join game_category on game.game_name = game_category.game where game.game_status = 'Production'
 #and game.game_group is not null order by game_group, name limit 4
 
-query = session.query(Game, GameCategory) \
+query = dbSession.query(Game, GameCategory) \
     .join(GameCategory, Game.game_id == GameCategory.game_id) \
     .filter(Game.game_status == 'Production') \
     .filter(Game.game_group.isnot(None)) \
@@ -119,7 +182,7 @@ def remove_html_tags(text):
     return re.sub(clean, '', text)
 
 
-
+#FIXFIXFIXFIXFIXFIXFIX
 def hintsandsources(q,gameid,qnum):
     result = []
 
@@ -128,13 +191,16 @@ def hintsandsources(q,gameid,qnum):
 
     for i in range(len(result)):
         if i%2==1:
-            qry="Select description FROM source WHERE name='"+result[i].strip().lower()+"'"
-            content=engine.execute(qry).fetchall()
+            fout.write(f"thisiscontent:{result}")
+            fout.flush()
+            content=dbSession.query(Source).filter(Source.description==result[i].strip().lower()).first()
+            # qry="Select description FROM source WHERE name='"+result[i].strip().lower()+"'"
+            # content=engine.execute(qry).fetchall()
             if content:
-                result[i]="<span><!--"+content[0][0]+"--></span>"
+                result[i]="<span><!--"+content.name+"--></span>"
                 #result[i]="<small style='display:none'>"+content[0][0]+"</small>"
             else:
-                #try:
+                try:
                     result[i]=int(result[i].strip())
                     hints=current[gameid][4][int(qnum)]
                     #oqry="Select hints FROM question WHERE title='"+(str(game.questions.split(',')[int(qnum)])).replace("'","''")+"'"
@@ -150,7 +216,7 @@ def hintsandsources(q,gameid,qnum):
                         li_list.append(li_content)
                         start_pos = end_li
                     result[i]="<span><!--"+li_list[result[i]-1]+"--></span>"
-                #except:
+                except:
                     result[i]=str(result[i])
     q = " ".join(result)
     return q
@@ -165,21 +231,53 @@ def player():
 def aboutus():
     return render_template("aboutus.html")
 @app.route("/join",methods=["GET","POST"])
+
 def join_page():
     form=JoinForm()
     if form.submit.data and form.validate():
-        if Games.query.filter_by(code=form.code.data).count()==0:
-            flash("Invalid code",category="danger")
-        elif Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).count()!=0:
-            flash("Name already in use. Please choose another name.", category="danger")
+        code=form.code.data
+        fout.write("\n")
+        fout.write("thisisthecode: "+code+"\n")
+        fout.flush()
+        if dbSession.query(Games).filter(Games.code==code).count()==0:
+            flash("Invalid Code.",category="danger")
         else:
-            db.session.add(Players(name=form.name.data,score=0,game=Games.query.filter_by(code=form.code.data).first().id
-                               ,streak=0,submission="",result=""))
-            db.session.commit()
-            newlink="/waiting/"+str(Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).first().id)+"/"+\
-                    str(Games.query.filter_by(code=form.code.data).first().id)
-            return redirect(newlink)
+            game_id=dbSession.query(Games).filter(Games.code==code).first().id
+            if dbSession.query(Players).filter(Players.name==form.name.data,Players.game_id==game_id).count()!=0:
+                flash("Name already in use. Please choose another name.", category="danger")
+            else:
+                player_id=random.randint(100000, 999999)
+                new_player = Players(
+                id=player_id,
+                name=form.name.data,
+                score=0,
+                game_id=game_id,
+                streak=0,
+                result='',
+                submission=''
+                )
+                dbSession.add(new_player)
+                dbSession.commit()
+
+                newlink="/waiting/"+str(player_id)+"/"+\
+                        str(game_id)
+                return redirect(newlink)
     return render_template("join.html",form=form)
+# def join_page():
+#     form=JoinForm()
+#     if form.submit.data and form.validate():
+#         if Games.query.filter_by(code=form.code.data).count()==0:
+#             flash("Invalid code",category="danger")
+#         elif Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).count()!=0:
+#             flash("Name already in use. Please choose another name.", category="danger")
+#         else:
+#             db.dbSession.add(Players(name=form.name.data,score=0,game=Games.query.filter_by(code=form.code.data).first().id
+#                                ,streak=0,submission="",result=""))
+#             db.dbSession.commit()
+#             newlink="/waiting/"+str(Players.query.filter_by(name=form.name.data,game=Games.query.filter_by(code=form.code.data).first().id).first().id)+"/"+\
+#                     str(Games.query.filter_by(code=form.code.data).first().id)
+#             return redirect(newlink)
+#     return render_template("join.html",form=form)
 playerscore={}
 @app.route("/waiting/<playerid>/<gameid>")
 def waiting_page(playerid,gameid):
@@ -189,8 +287,8 @@ def waiting_page(playerid,gameid):
         numconnected[gameid]=1
     else:
         numconnected[gameid]+=1
-    return render_template("waitscreenplayer.html",game=Games.query.filter_by(id=gameid).first()
-    ,player=Players.query.filter_by(id=playerid).first(),pnames=pnames[gameid],playerid=playerid)
+    return render_template("waitscreenplayer.html",game=dbSession.query(Games).filter(Games.id==gameid).first()
+    ,player=dbSession.query(Players).filter(Players.id==playerid).first(),pnames=pnames[gameid],playerid=playerid)
 currentquestion={}
 totalcurrentchoice={}
 @app.route("/questionhost/<gameid>/<qnum>",methods=["GET","POST"])
@@ -198,7 +296,7 @@ def question_host_page(gameid,qnum):
     global current
     global numanswered
     global pnames
-    game=Games.query.filter_by(id=gameid).first()
+    game=dbSession.query(Games).filter(Games.id==gameid).first()
     # q=engine.execute("Select question_content FROM question WHERE title LIKE '%%"+(str(game.questions.split(',')[int(qnum)])).replace("'","''")+"%%'").fetchall()[0][0]
     # choices=engine.execute("Select choices FROM question WHERE title LIKE '%%"+(str(game.questions.split(',')[int(qnum)])).replace("'","''")+"%%'").fetchall()[0][0].split('\n')
 
@@ -259,8 +357,9 @@ def multiquestion_page(playerid,gameid,qnum):
     global current
     form=SubmitAnswerForm()
     qnum=int(qnum)
-    game=Games.query.filter_by(id=gameid).first()
-    player=Players.query.filter_by(id=int(playerid)).first()
+    player=dbSession.query(Players).filter(Players.id==int(playerid)).first()
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
+    # player=Players.query.filter_by(id=int(playerid)).first()
     # oqry="Select correct_choice FROM question WHERE title=%s"
     # try:
     #     question_title = game.questions.split(',')[qnum]#.replace("'", "")
@@ -287,7 +386,7 @@ def multiquestion_page(playerid,gameid,qnum):
         else:
             player.streak=0
             player.result+="0;"
-        db.session.commit()
+        dbSession.commit()
         #rt="/submittedanswer/"+str(playerid)+"/"+str(gameid)+"/"+str(qnum)
         if timel>0:
             rt="/submittedanswer/"+str(playerid)+"/"+str(gameid)+"/"+str(qnum)
@@ -345,7 +444,7 @@ def multiquestion_page(playerid,gameid,qnum):
 def delete_players_helper(pg):
     try:
         
-        return Games.query.filter_by(id=pg).first().code
+        return Games.query.filter(id=pg).first().code
     except:
         return ""
 def delete_players_helper1(pg):
@@ -355,63 +454,186 @@ def delete_players_helper1(pg):
     except:
         return 100000000000
 
+def question_query(superset,question_set):
+    question_set=split_question(question_set)
+    for i in question_set:
+        if i not in superset:
+            return False
+    return True
+
+def split_question(question_cat):
+    res=[]
+    question_cat=question_cat.replace(':',';').split(';')
+    for cat in question_cat:
+        if cat!='':
+            if cat[0]==' ':
+                res.append(cat[1:].lower())
+            else:
+                res.append(cat.lower())
+    res=list(set(res))
+    return res
 
 @app.route('/start',methods=["GET","POST"])
 def start_page():
     form=StartGameForm()
-    deleted_objects = Players.__table__.delete().where(float(delete_players_helper1(Players.game))<=time.time()-3600)
+    fout.flush() 
+    
     try:
-        db.session.execute(deleted_objects)
-        db.session.commit()
+        deleted_objects = Players.__table__.delete().where(float(delete_players_helper1(Players.game))<=time.time()-3600)
+        db.dbSession.execute(deleted_objects)
+        db.dbSession.commit()
         deleted_objects = Games.__table__.delete().where(Games.starttime<=time.time()-3600)
-        db.session.execute(deleted_objects)
-        db.session.commit()
+        db.dbSession.execute(deleted_objects)
+        db.dbSession.commit()
     except:
         pass
     if form.validate_on_submit():
-
         if request.form.get("game_choice"):
-            try:
-                print(session["handles"])
-            except:
-                session["handles"]=[]
-            
-            session.modified = True
-            if Games.query.filter_by(code=form.code.data) and form.code.data in session["handles"]:
-                update_statement = Games.__table__.update().where(Games.code==form.code.data).values(code="")
-                db.session.execute(update_statement)
-                db.session.commit()
-                #deleted_objects = Players.__table__.delete().where(str(func.delete_players_helper(Players.game))==str(form.code.data))
-                #a=db.session.execute(deleted_objects)
-                #db.session.commit()
-                #deleted_objects = Games.__table__.delete().where(Games.code==form.code.data)
-
-                #db.session.execute(deleted_objects)
-                #db.session.commit()
-            session["handles"].append(form.code.data)
             gamechoice = str(request.form.get("game_choice"))
-            print(gamechoice)
+            query = dbSession.query(Game, GameCategory) \
+            .join(GameCategory, Game.game_id == GameCategory.game_id) \
+            .filter(Game.game_status == 'Production') \
+            .filter(Game.game_name == gamechoice) \
+            .filter(Game.game_group.isnot(None)) \
+            .order_by(Game.game_group, Game.game_name)
+            
+            results = query.all()
+            total_questions=0
+            for game, category in results:
+                print(f"Game: {game.game_name}, Category: {game.game_group}, Number of Question: {category.no_questions},{category.gc_categories}")
+            superset=[]
+            catarr=[]
+            for game,category in results:
+                catarr.append(category.gc_categories) 
+                total_questions+=category.no_questions  
+            print(catarr)
+            print("hello")
 
-            qry="Select * FROM game_category WHERE game='"+gamechoice+"'"
-            gamerow=engine.execute(qry).fetchall()[0]
-            qry="Select title FROM question WHERE categories LIKE '%%"+gamerow[6]+"%%'" ##might need to change to gamerow[1]
-            pqs=list(engine.execute(qry).fetchall())
-            qs=random.sample(pqs,gamerow[2])
-            qstr=""
-            for element in qs:
-                qstr+=(str(element[0])+",")
+            query = dbSession.query(Question.question_categories, Question.question_id)\
+            .order_by(func.random())
+
+            results=query.all()
+            
+            question_arr=[]
+            for question in results:
+                arr=question.question_categories.lower().replace(':', ';').split(';')
+                arr = list(map(str.strip, arr))
+            
+                #print(arr)
+                found=0
+                for cat in catarr:
+                    catelements=cat.lower().replace(':', ';').split(';')
+                    catelements = list(map(str.strip, catelements))
+                    for catelement in catelements:
+                        if catelement in arr:
+                            found=1
+                        else:
+                            found=0
+                            break
+                    if found==1:
+                        question_arr.append(question.question_id)
+            random.shuffle(question_arr)
+            question_arr=question_arr[:total_questions]
+            qstr=''
+            for i in question_arr:
+                qstr+=i+','
+            qstr=qstr[:-1]
+            code1 = form.code.data
+            game_id=random.randint(1, 1000000000) #come up with better solution to avoid collisions
+            new_game = Games(
+                id=game_id,
+                game=gamechoice,
+                questions=qstr,
+                code=code1,
+                time=0,
+                starttime=time.time()
+            )
+            dbSession.add(new_game)
+
+            # Commit the transaction
+            dbSession.commit()
+
+
+
+
+            fout.write(gamechoice)
+            # if request.form.get("game_choice"):
+            #     try:
+            #         print(session.get("handles"))
+            #     except:
+            #         handles = session.get("handles", [])
+            # query = dbSession.query(Game, GameCategory) \
+            # .join(GameCategory, Game.game_id == GameCategory.game_id) \
+            # .filter(Game.game_status == 'Production') \
+            # .filter(Game.game_name == gamechoice) \
+            # .filter(Game.game_group.isnot(None)) 
+            # total_questions=0
+            #     # Execute the query and fetch all results
+            # results = query.all()
+            # superset=[]
+            # for game,category in results:
+            #     total_questions+=category.no_questions
+            #     curr_cat=category.gc_categories
+            #     curr_cat_final=split_question(curr_cat)
+            #     for cat in curr_cat_final:
+            #         superset.append(cat)
+            # print(f'total:{total_questions}')
+            # superset=set(superset)
+            # print(f'spuerset:{superset}')
+            # result = dbSession.query(Question)\
+            # .filter(question_query(superset, str(Question.question_categories)))\
+            # .order_by(func.random())\
+            # .limit(total_questions).all()
+            # qstr=""
+            # for question in result:
+            #     qstr+=(str(question.title)+",")
+            # fout.write(f'question:{qstr}')
+            # # db.session.add(Games(game=gamechoice,code=code,time=0,questions=qstr, starttime=time.time()))
+            # # db.session.commit()
+            # fout.write("\n")
+            # fout.flush()
+
+
+
+
+            # session.modified = True
+            # handles = session.get("handles", [])
+            # if Games.query.filter_by(code=form.code.data) and form.code.data in session.get("handles",[]):
+            #     update_statement = Games.__table__.update().where(Games.code==form.code.data).values(code="")
+            #     db.dbSession.execute(update_statement)
+            #     db.dbSession.commit()
+            #     #deleted_objects = Players.__table__.delete().where(str(func.delete_players_helper(Players.game))==str(form.code.data))
+            #     #a=db.session.execute(deleted_objects)
+            #     #db.session.commit()
+            #     #deleted_objects = Games.__table__.delete().where(Games.code==form.code.data)
+
+            #     #db.session.execute(deleted_objects)
+            #     #db.session.commit()
+            # handles.append(form.code.data)
+            # session["handles"] = handles
+            # session["handles"].append(form.code.data)
+
+
+            
+
+            # qry="Select * FROM game_category WHERE game='"+gamechoice+"'"
+            # gamerow=engine.execute(qry).fetchall()[0]
+            # qry="Select title FROM question WHERE categories LIKE '%%"+gamerow[6]+"%%'" ##might need to change to gamerow[1]
+            # pqs=list(engine.execute(qry).fetchall())
+            # qs=random.sample(pqs,gamerow[2])
+            # qstr=""
+            # for element in qs:
+            #     qstr+=(str(element[0])+",")
             code = form.code.data
             
             #     code = random.randint(100000, 999999)
-            db.session.add(Games(game=gamechoice,code=code,time=0,questions=qstr, starttime=time.time()))
-            db.session.commit()
-            gameid=str(Games.query.filter_by(code=code).first().id)
+            # gameid=str(Games.query.filter_by(code=code).first().id)
             global curentgame
-            currentgame[gameid]=gamechoice
-            nl="/waiting/host/"+str(Games.query.filter_by(code=code).first().id)
+            currentgame[game_id]=gamechoice
+            nl="/waiting/host/"+str(game_id)
             return redirect(nl)
         else:
-    
+
             flash("Please choose a game.",category="danger")
     if form.errors!={}:
         # for err_msg in form.errors.values():
@@ -422,7 +644,7 @@ def start_page():
     arr1=["Civics","News","Voting"]
     arr.append(['Play a Demo','LWV Demo','asdfa',4])
     
-    query = session.query(Game, GameCategory) \
+    query = dbSession.query(Game, GameCategory) \
         .join(GameCategory, Game.game_id == GameCategory.game_id) \
         .filter(Game.game_status == 'Production') \
         .filter(Game.game_group.isnot(None)) \
@@ -445,6 +667,8 @@ def start_page():
             done.add(i[0]+i[1])
             pass_final.append([i[0],i[1],common_names[i[0]+i[1]]])
     pass_to_start=pass_final
+       
+    
     # for i in results:
     #     if i[1] in dict1:
     #         dict1[i[1]]+=i[3]
@@ -474,14 +698,14 @@ def start_page():
     #     arr.pop(i)
     return render_template("start.html",engine=engine,form=form,arr=pass_to_start)
 @app.route("/waiting/host/<id>",methods=["GET","POST"])
-
 def waiting_host_page(id):
     global numconnected
     numconnected[id]=0
     global numanswered
     numanswered[id]=0
     form=StartGameForm()
-    players=Players.query.filter_by(game=id)
+    players=dbSession.query(Players).filter(Players.game_id==id).all()
+    # players=Players.query.filter_by(game=id)
     global pnames
     pnames[id]=[]
     for p in players:
@@ -502,32 +726,43 @@ def waiting_host_page(id):
     correct=[]
     hint=[]
     global current
-    for i in engine.execute("select DISTINCT categories, no_questions from game_category where game = '"+currentgame[id]+"' and no_questions > 0").fetchall():
-        for j in engine.execute("select * from(select DISTINCT title, question_content, followup, choices, correct_choice, hints, bug_path_name,text_color,background_color,'class' from question q, game_category gc where gc.categories = '"+i[0]+"' and game = '"+currentgame[id]+"' and status = 'Production' and  array_remove(regexp_split_to_array(lower(btrim(gc.categories, ' ')), '[;|:]\s*'), '') <@ array_remove(regexp_split_to_array(lower(btrim(q.categories,  ' ')), '[;|:]\s*'), '')) as c order by random() limit '"+str(i[1])+"'").fetchall():
-            q1.append(j[1])
-            currentchoice.append(j[3])
-            correct.append(j[4]-1)
-            followup.append(j[2])
-            hint.append(j[5])
+    qstr=''
+    qstring=dbSession.query(Games.questions).filter(Games.id==id).first().questions
+    qstring=qstring.split(',')
+    for i in qstring:
+        quest=dbSession.query(Question).filter(Question.question_id==i).first()
+        q1.append(quest.question_content)
+        currentchoice.append(quest.choices)
+        correct.append(quest.correct_choice-1)
+        followup.append(quest.followup)
+        hint.append(quest.hints)
+    # for i in engine.execute("select DISTINCT categories, no_questions from game_category where game = '"+currentgame[id]+"' and no_questions > 0").fetchall():
+    #     for j in engine.execute("select * from(select DISTINCT title, question_content, followup, choices, correct_choice, hints, bug_path_name,text_color,background_color,'class' from question q, game_category gc where gc.categories = '"+i[0]+"' and game = '"+currentgame[id]+"' and status = 'Production' and  array_remove(regexp_split_to_array(lower(btrim(gc.categories, ' ')), '[;|:]\s*'), '') <@ array_remove(regexp_split_to_array(lower(btrim(q.categories,  ' ')), '[;|:]\s*'), '')) as c order by random() limit '"+str(i[1])+"'").fetchall():
+    #         q1.append(j[1])
+    #         currentchoice.append(j[3])
+    #         correct.append(j[4]-1)
+    #         followup.append(j[2])
+    #         hint.append(j[5])
     current[id]=[q1,followup,currentchoice,correct,hint] 
-    return render_template("waitscreenhost.html",game=Games.query.filter_by(id=id).first(),form=form,pnames=pnames[id])
+    return render_template("waitscreenhost.html",game=dbSession.query(Games).filter(Games.id==id).first(),form=form,pnames=pnames[id])
 @app.route("/submittedanswer/<playerid>/<gameid>/<qnum>")
 def submitted_answer_page(playerid,gameid,qnum):
     global numanswered
     numanswered[gameid]+=1
-    game=Games.query.filter_by(id=gameid).first()
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
     return render_template("submittedanswer.html",game=game,qnum=int(qnum),playerid=playerid,numconnected=numconnected[gameid],numanswered=numanswered[gameid])
 
 @app.route("/resultplayer/<playerid>/<gameid>/<qnum>")
 def player_result_page(playerid,gameid,qnum):
     qnum=int(qnum)
     global current
-    game=Games.query.filter_by(id=gameid).first()
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
     # oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     # corrans=engine.execute(oqry).fetchall()[0][0]-1
     # oqry="Select choices FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     subnums=[0]*len(current[gameid][0])
-    for player in Players.query.filter_by(game=gameid):
+    dbSession.query(Players).filter(Players.game_id==gameid)
+    for player in dbSession.query(Players).filter(Players.game_id==gameid).all():
         try:
             if player.submission.split(';')[qnum]!="":
                 subnums[int(player.submission.split(';')[qnum])]+=1
@@ -551,7 +786,7 @@ def player_result_page(playerid,gameid,qnum):
                     removed[gameid]=list(set(removed[gameid]))
             pass
 
-    pans=(Players.query.filter_by(id=playerid).first().submission.split(';')[-2])
+    pans=(dbSession.query(Players).filter(Players.id==playerid).first().submission.split(';')[-2])
     if pans!="":
         pans=int(pans)
     # qry="Select question_content FROM question WHERE title='"+game.questions.split(',')[qnum]+"'"
@@ -603,27 +838,28 @@ def player_result_page(playerid,gameid,qnum):
     #     player.streak=0
     #     player.result+="0;"
     # db.session.commit()
-    return render_template("resultplayer.html",player=Players.query.filter_by(id=playerid).first(),game=game,qnum=int(qnum)
+    return render_template("resultplayer.html",player=dbSession.query(Players).filter(Players.id==playerid).first(),game=game,qnum=int(qnum)
     ,corrans=current[gameid][3][int(qnum)],choices=clean(current[gameid][2][int(qnum)])
     ,subnums=subnums,pans=pans,engine=engine,q=q,playerid=playerid)
 
 @app.route("/leaderboardp/<playerid>/<gameid>/<qnum>")
 def leaderboard_player_page(playerid,gameid,qnum):
-    ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
+    ps=dbSession.query(Players).filter(Players.game_id==gameid).order_by(Players.score.desc()).all()
     return render_template("leaderboardplayer.html",ps=ps,playerid=playerid,gameid=gameid,qnum=int(qnum))
 
 @app.route("/leaderboardh/<gameid>/<qnum>")
 def leaderboard_host_page(gameid,qnum):
     global numanswered
     numanswered[gameid]=0
-    ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
-    game=Games.query.filter_by(id=gameid).first()
+    ps=dbSession.query(Players).filter(Players.game_id==gameid).order_by(Players.score.desc()).all()
+    # ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
     global current
-    return render_template("leaderboardhost.html",ps=ps,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum),totalquestions=len(game.questions.split(','))-2,code=game.code,totalnum=len(current[gameid][0])-1)
+    return render_template("leaderboardhost.html",ps=ps,game=dbSession.query(Games).filter(Games.id==int(gameid)).first(),qnum=int(qnum),totalquestions=len(game.questions.split(','))-2,code=game.code,totalnum=len(current[gameid][0])-1)
 
 @app.route("/playerfollowup/<playerid>/<gameid>/<qnum>")
 def followup_player_page(playerid,gameid,qnum):
-    game=Games.query.filter_by(id=gameid).first()
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
     # oqry="Select followup FROM question WHERE title='"+str(game.questions.split(',')[int(qnum)])+"'"
     # q=engine.execute(oqry).fetchall()[0][0]
     q=current[gameid][1][int(qnum)]
@@ -667,14 +903,14 @@ def host_result_page(gameid,qnum):
     global numanswered
     numanswered[id]=0
     qnum=int(qnum)
-    game=Games.query.filter_by(id=gameid).first()
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
     # oqry="Select correct_choice FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     # # corrans=engine.execute(oqry).fetchall()[0][0]-1
     # oqry="Select choices FROM question WHERE title='"+str(game.questions.split(',')[qnum])+"'"
     # subnums=[0]*len(engine.execute(oqry).fetchall()[0][0].split("\n"))
     global current
     subnums=[0]*len(clean(current[gameid][2][int(qnum)]))
-    for player in Players.query.filter_by(game=gameid):
+    for player in dbSession.query(Players).filter(Players.game_id==gameid).all():
         try:
             if player.submission.split(';')[qnum]!="":
                 subnums[int(player.submission.split(';')[qnum])]+=1
@@ -740,7 +976,7 @@ def host_result_page(gameid,qnum):
 
 @app.route("/hostfollowup/<gameid>/<qnum>")
 def followup_host_page(gameid,qnum):
-    game=Games.query.filter_by(id=gameid).first()
+    game=dbSession.query(Games).filter(Games.id==int(gameid)).first()
     # oqry="Select followup FROM question WHERE title='"+str(game.questions.split(',')[int(qnum)])+"'"
     # q=engine.execute(oqry).fetchall()[0][0] 
     q=current[gameid][1][int(qnum)]
@@ -779,12 +1015,12 @@ def followup_host_page(gameid,qnum):
     # q = " ".join(result)
     q=hintsandsources(q,gameid,qnum)
     #global current
-    return render_template("followuphost.html",q=q,game=Games.query.filter_by(id=gameid).first(),qnum=int(qnum),code=game.code)
+    return render_template("followuphost.html",q=q,game=dbSession.query(Games).filter(Games.id==int(gameid)).first(),qnum=int(qnum),code=game.code)
 
 @app.route("/podium/<gameid>")
 def podium_page(gameid):
-    ps=Players.query.filter_by(game=gameid).order_by(Players.score.desc())
-    return render_template("podium.html",ps=ps,game=Games.query.filter_by(id=gameid).first())
+    ps=dbSession.query(Players).filter(Players.game_id==gameid).order_by(Players.score.desc()).all()
+    return render_template("podium.html",ps=ps,game=dbSession.query(Games).filter(Games.id==int(gameid)).first())
 
 # @socketio.on('text')
 # def text(data):
@@ -796,7 +1032,7 @@ def podium_page(gameid):
 #     return render_template("temp.html",engine=engine,qnum=int(qnum),len=len(choices),choices=choices,answer=answer)
 @socketio.on('newc')
 def newc(gid):
-    players=Players.query.filter_by(game=gid)
+    players=dbSession.query(Players).filter(Players.game==gid).all()
     global pnames
     pnames[gid]=[]
     for p in players:
