@@ -540,7 +540,7 @@ def podium_page(gameid):
     return render_template("podium.html",ps=ps,game=dbSession.query(Games).filter(Games.id==int(gameid)).first())
 @socketio.on('newc')
 def newc(gid):
-    players=dbSession.query(Players).filter(Players.game==gid).all()
+    players=dbSession.query(Players).filter(Players.game_id==gid).all()
     global pnames
     pnames[gid]=[]
     for p in players:
