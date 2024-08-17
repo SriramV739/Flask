@@ -64,11 +64,11 @@ def hintsandsources(q,gameid,qnum):
 
     for i in range(len(result)):
         if i%2==1:
-            content=dbSession.query(Source).filter(Source.description==result[i].strip().lower()).first()
+            content=dbSession.query(Source).filter(Source.name==result[i].strip().lower()).first()
             # qry="Select description FROM source WHERE name='"+result[i].strip().lower()+"'"
             # content=engine.execute(qry).fetchall()
             if content:
-                result[i]="<span><!--"+content.name+"--></span>"
+                result[i]="<span><!--"+content.description+"--></span>"
                 #result[i]="<small style='display:none'>"+content[0][0]+"</small>"
             else:
                 try:
